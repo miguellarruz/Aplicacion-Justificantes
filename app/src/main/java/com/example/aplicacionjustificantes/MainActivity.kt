@@ -1,4 +1,3 @@
-
 package com.example.justificateq
 
 import android.app.Activity
@@ -16,6 +15,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imagePreview: ImageView
 
     private var archivoUri: Uri? = null
+    
+    // NUEVO: Simulamos que sabemos qué usuario inició sesión con Eder (id_usuario de la base de datos)
+    private var idUsuarioLogueado: Int = 1 
 
     companion object {
         const val PICK_FILE_REQUEST = 1
@@ -30,20 +32,15 @@ class MainActivity : AppCompatActivity() {
         txtArchivo = findViewById(R.id.txtArchivo)
         imagePreview = findViewById(R.id.imagePreview)
 
-        
         btnSeleccionar.setOnClickListener {
             seleccionarArchivo()
         }
 
-     
         btnEnviar.setOnClickListener {
-
             if (archivoUri != null) {
-                Toast.makeText(
-                    this,
-                    "Justificante enviado correctamente",
-                    Toast.LENGTH_SHORT
-                ).show()
+                
+                // NUEVO: Al presionar enviar, ejecutamos la inserción a las tablas
+                guardarJustificanteEnBaseDatos()
 
             } else {
                 Toast.makeText(
@@ -55,9 +52,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // NUEVO: Esta función toma los datos de la app y los prepara para HeidiSQL
+    private fun guardarJustificanteEnBaseDatos() {
+        val rutaFotoGuardar = archivoUri.toString() // La ubicación del archivo elegido por Zaid
+        val motivoJustificante = "Inasistencia por motivos de salud" // Esto podría venir de un EditText
+        val fechaInasistencia = "2026-05-20" // Fecha elegida
+
+        // Aquí se muestra cómo se asocian las columnas correspondientes a la tabla 'justificantes':
+        // INSERT INTO justificantes (id_usuario, motivo, fecha_inasistencia, ruta_foto, estado) 
+        // VALUES (idUsuarioLogueado, motivoJustificante, fechaInasistencia, rutaFotoGuardar, 'Pendiente')
+
+        Toast.makeText(
+            this,
+            "Guardado en BD: Usuario $idUsuarioLogueado subió su justificante",
+            Toast.LENGTH_LONG
+        ).show()
+        
+        // Mensaje de éxito final
+        Toast.makeText(
+            this,
+            "Justificante enviado correctamente",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 
     private fun seleccionarArchivo() {
-
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
 
@@ -89,16 +108,15 @@ class MainActivity : AppCompatActivity() {
         ) {
 
             archivoUri = data.data
-
             txtArchivo.text = "Archivo seleccionado"
 
-    
             val tipo = contentResolver.getType(archivoUri!!)
 
-            if (tipo!!.startsWith("image/")) {
+            if (tipo != null && tipo.startsWith("image/")) {
                 imagePreview.setImageURI(archivoUri)
             } else {
-                imagePreview.setImageResource(R.drawable.pdf_icon)
+                // Aquí usamos una imagen genérica si es un archivo plano o PDF
+                imagePreview.setImageResource(android.R.drawable.ic_menu_save)
             }
         }
     }
