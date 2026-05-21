@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F7FA"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CeCyTe Qro"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="#1A237E"
+        android:layout_marginBottom="5dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Plataforma de Justificantes"
+        android:textSize="16sp"
+        android:textColor="#5C6BC0"
+        android:layout_marginBottom="35dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="20dp"
+        android:elevation="4dp"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Correo Institucional"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/edtCorreoEder"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="tu_usuario@cecyteq.edu.mx"
+            android:inputType="textEmailAddress"
+            android:background="#F9FAFB"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contraseña"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/edtPasswordEder"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="••••••••"
+            android:inputType="textPassword"
+            android:background="#F9FAFB"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="10dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnIngresarEder"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:text="Iniciar Sesión"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="#1A237E"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="20dp"/> <TextView
+    android:id="@+id/txtRegistrarseEder"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="¿No tienes cuenta? Regístrate aquí"
+    android:textSize="14sp"
+    android:textColor="#5C6BC0"
+    android:textStyle="bold"
+    android:padding="10dp"
+    android:clickable="true"
+    android:focusable="true"/>
+
+</LinearLayout>

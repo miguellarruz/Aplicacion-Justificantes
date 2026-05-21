@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
 
     private var archivoUri: Uri? = null
     
-    // NUEVO: Simulamos que sabemos qué usuario inició sesión con Eder (id_usuario de la base de datos)
+
     private var idUsuarioLogueado: Int = 1 
 
     companion object {
