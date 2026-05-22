@@ -14,24 +14,24 @@ class PrimeraVistaEder : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.eder_vista)
 
-        // Enlazamos los componentes del XML (Asegúrate de que coincidan los IDs)
+       
         val edtCorreo = findViewById<EditText>(R.id.edtCorreoEder)
         val edtPassword = findViewById<EditText>(R.id.edtPasswordEder)
         val btnIngresar = findViewById<Button>(R.id.btnIngresarEder)
         val txtRegistrarse = findViewById<TextView>(R.id.txtRegistrarseEder)
 
-        // 1. ACCIÓN AL PICARLE A "INICIAR SESIÓN"
+      
         btnIngresar.setOnClickListener {
             val correo = edtCorreo.text.toString().trim()
             val password = edtPassword.text.toString().trim()
 
-            // Validar que no dejen campos vacíos
+           
             if (correo.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Filtro estricto del dominio institucional @cecyteq.edu.mx
+            
             if (correo.endsWith("@cecyteq.edu.mx")) {
 
                 Toast.makeText(this, "Acceso concedido", Toast.LENGTH_SHORT).show()
