@@ -11,12 +11,14 @@ class Interfaz : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.interfaz)
 
-        val btnAutenticacion = findViewById<Button>(R.id.btnIrAutenticacion)
+        // Buscamos los botones (Asegúrate de que el ID en tu XML sea btnIrAutenticacion o cámbialo al que uses)
+        val btnNuevaSolicitud = findViewById<Button>(R.id.btnIrAutenticacion)
         val btnNotificaciones = findViewById<Button>(R.id.btnIrNotificaciones)
         val btnVisualizacion = findViewById<Button>(R.id.btnIrVisualizacion)
 
-        btnAutenticacion.setOnClickListener {
-            val intent = Intent(this, PrimeraVistaEder::class.java)
+        // AHORA MANDA AL MAIN ACTIVITY (Formulario de Justificante)
+        btnNuevaSolicitud.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
 

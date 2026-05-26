@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">Aplicacion Justificantes</string>
+    <string name="archivo_seleccionado">Archivo seleccionado</string>
+    <string name="selecciona_archivo_primero">Selecciona un archivo primero</string>
+    <string name="exito_mensaje">¡Éxito!: %1$s</string>
+    <string name="error_servidor">Error del servidor: %1$s</string>
+    <string name="error_procesar_respuesta">Error al procesar respuesta: %1$s</string>
+    <string name="error_red">Error de red: No se pudo conectar a XAMPP</string>
+    <string name="selecciona_justificante">Selecciona un justificante</string>
+    <string name="motivo_salud">Inasistencia por motivos de salud</string>
+    <string name="registro_usuario">Registro de Usuario</string>
+    <string name="nombre_completo">Nombre Completo</string>
+    <string name="matricula">Matrícula</string>
+    <string name="correo_institucional">Correo Institucional</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="registrar">Registrar</string>
+    <string name="ya_tienes_cuenta">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="llena_campos">Por favor, llena todos los campos</string>
+    <string name="error_password_corta">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="registro_exitoso">¡Registro exitoso para %1$s!</string>
 </resources>

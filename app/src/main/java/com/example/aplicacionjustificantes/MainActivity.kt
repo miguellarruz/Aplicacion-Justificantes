@@ -1,11 +1,17 @@
-package com.example.justificateq
+package com.example.aplicacionjustificantes
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.*
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,12 +21,28 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imagePreview: ImageView
 
     private var archivoUri: Uri? = null
-    
+    private var idUsuarioLogueado: Int = 1
 
-    private var idUsuarioLogueado: Int = 1 
+    // Selector de archivos moderno (Reemplaza al obsoleto onActivityResult)
+    private val seleccionarArchivoLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            val data: Intent? = result.data
+            archivoUri = data?.data
 
-    companion object {
-        const val PICK_FILE_REQUEST = 1
+            if (archivoUri != null) {
+                txtArchivo.text = getString(R.string.archivo_seleccionado)
+                val tipo = contentResolver.getType(archivoUri!!)
+
+                if (tipo != null && tipo.startsWith("image/")) {
+                    imagePreview.setImageURI(archivoUri)
+                } else {
+                    // Imagen genérica para PDFs o documentos planos
+                    imagePreview.setImageResource(android.R.drawable.ic_menu_save)
+                }
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,86 +60,64 @@ class MainActivity : AppCompatActivity() {
 
         btnEnviar.setOnClickListener {
             if (archivoUri != null) {
-                
-                // NUEVO: Al presionar enviar, ejecutamos la inserción a las tablas
                 guardarJustificanteEnBaseDatos()
-
             } else {
-                Toast.makeText(
-                    this,
-                    "Selecciona un archivo primero",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this, getString(R.string.selecciona_archivo_primero), Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    // NUEVO: Esta función toma los datos de la app y los prepara para HeidiSQL
     private fun guardarJustificanteEnBaseDatos() {
-        val rutaFotoGuardar = archivoUri.toString() // La ubicación del archivo elegido por Zaid
-        val motivoJustificante = "Inasistencia por motivos de salud" // Esto podría venir de un EditText
-        val fechaInasistencia = "2026-05-20" // Fecha elegida
+        // Tu IP del laboratorio y la ruta hacia tu script de XAMPP
+        val url = "http://192.168.2.94/justificantes_api/guardar_justificante.php"
 
-        // Aquí se muestra cómo se asocian las columnas correspondientes a la tabla 'justificantes':
-        // INSERT INTO justificantes (id_usuario, motivo, fecha_inasistencia, ruta_foto, estado) 
-        // VALUES (idUsuarioLogueado, motivoJustificante, fechaInasistencia, rutaFotoGuardar, 'Pendiente')
+        val queue = Volley.newRequestQueue(this)
 
-        Toast.makeText(
-            this,
-            "Guardado en BD: Usuario $idUsuarioLogueado subió su justificante",
-            Toast.LENGTH_LONG
-        ).show()
-        
-        // Mensaje de éxito final
-        Toast.makeText(
-            this,
-            "Justificante enviado correctamente",
-            Toast.LENGTH_SHORT
-        ).show()
+        // Configuración de la petición POST hacia PHP
+        val stringRequest = object : StringRequest(
+            Method.POST,
+            url,
+            { response ->
+                try {
+                    val jsonResponse = JSONObject(response)
+                    val status = jsonResponse.getString("status")
+                    val message = jsonResponse.getString("message")
+
+                    if (status == "success") {
+                        Toast.makeText(this@MainActivity, getString(R.string.exito_mensaje, message), Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@MainActivity, getString(R.string.error_servidor, message), Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, getString(R.string.error_procesar_respuesta, e.message), Toast.LENGTH_LONG).show()
+                }
+            },
+            { _ ->
+                Toast.makeText(this@MainActivity, getString(R.string.error_red), Toast.LENGTH_LONG).show()
+            },
+        ) {
+
+            // Datos que se envían por POST y que tu PHP va a recibir
+            override fun getParams(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["id_usuario"] = idUsuarioLogueado.toString()
+                params["motivo"] = getString(R.string.motivo_salud)
+                params["fecha_inasistencia"] = "2026-05-20"
+                params["ruta_foto"] = archivoUri.toString()
+                return params
+            }
+        }
+
+        // Añadir la petición a la cola para que se ejecute
+        queue.add(stringRequest)
     }
 
     private fun seleccionarArchivo() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
-
-        val tiposPermitidos = arrayOf(
-            "image/jpeg",
-            "image/png",
-            "application/pdf"
-        )
-
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, tiposPermitidos)
-
-        startActivityForResult(
-            Intent.createChooser(intent, "Selecciona un justificante"),
-            PICK_FILE_REQUEST
-        )
-    }
-
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == PICK_FILE_REQUEST &&
-            resultCode == Activity.RESULT_OK &&
-            data != null &&
-            data.data != null
-        ) {
-
-            archivoUri = data.data
-            txtArchivo.text = "Archivo seleccionado"
-
-            val tipo = contentResolver.getType(archivoUri!!)
-
-            if (tipo != null && tipo.startsWith("image/")) {
-                imagePreview.setImageURI(archivoUri)
-            } else {
-                // Aquí usamos una imagen genérica si es un archivo plano o PDF
-                imagePreview.setImageResource(android.R.drawable.ic_menu_save)
-            }
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "*/*"
+            val tiposPermitidos = arrayOf("image/jpeg", "image/png", "application/pdf")
+            putExtra(Intent.EXTRA_MIME_TYPES, tiposPermitidos)
         }
+        seleccionarArchivoLauncher.launch(Intent.createChooser(intent, getString(R.string.selecciona_justificante)))
     }
 }
