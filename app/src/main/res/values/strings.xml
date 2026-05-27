@@ -18,4 +18,5 @@
     <string name="llena_campos">Por favor, llena todos los campos</string>
     <string name="error_password_corta">La contraseña debe tener al menos 6 caracteres</string>
     <string name="registro_exitoso">¡Registro exitoso para %1$s!</string>
+    <string name="motivo_format">Motivo: %1$s</string>
 </resources>

@@ -23,7 +23,10 @@ class MainActivity : AppCompatActivity() {
     private var archivoUri: Uri? = null
     private var idUsuarioLogueado: Int = 1
 
-    // Selector de archivos moderno (Reemplaza al obsoleto onActivityResult)
+    // Variables para recibir lo que escribió el alumno en la Interfaz2A
+    private var motivoRecibido: String = ""
+    private var fechaRecibida: String = ""
+
     private val seleccionarArchivoLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
@@ -38,7 +41,6 @@ class MainActivity : AppCompatActivity() {
                 if (tipo != null && tipo.startsWith("image/")) {
                     imagePreview.setImageURI(archivoUri)
                 } else {
-                    // Imagen genérica para PDFs o documentos planos
                     imagePreview.setImageResource(android.R.drawable.ic_menu_save)
                 }
             }
@@ -48,6 +50,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // !!! AQUÍ RECUPERAMOS LOS DATOS DE LA PANTALLA ANTERIOR !!!
+        motivoRecibido = intent.getStringExtra("EXTRA_MOTIVO") ?: "Sin motivo"
+        fechaRecibida = intent.getStringExtra("EXTRA_FECHA") ?: "2026-01-01"
 
         btnSeleccionar = findViewById(R.id.btnSeleccionar)
         btnEnviar = findViewById(R.id.btnEnviar)
@@ -68,12 +74,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun guardarJustificanteEnBaseDatos() {
-        // Tu IP del laboratorio y la ruta hacia tu script de XAMPP
         val url = "http://192.168.2.94/justificantes_api/guardar_justificante.php"
-
         val queue = Volley.newRequestQueue(this)
 
-        // Configuración de la petición POST hacia PHP
         val stringRequest = object : StringRequest(
             Method.POST,
             url,
@@ -85,6 +88,7 @@ class MainActivity : AppCompatActivity() {
 
                     if (status == "success") {
                         Toast.makeText(this@MainActivity, getString(R.string.exito_mensaje, message), Toast.LENGTH_LONG).show()
+                        finish() // Cierra esta pantalla y regresa al inicio tras el éxito
                     } else {
                         Toast.makeText(this@MainActivity, getString(R.string.error_servidor, message), Toast.LENGTH_LONG).show()
                     }
@@ -97,18 +101,17 @@ class MainActivity : AppCompatActivity() {
             },
         ) {
 
-            // Datos que se envían por POST y que tu PHP va a recibir
+            // !!! AQUÍ PONEMOS LOS DATOS ENVIADOS DESDE INTERFAZ2A !!!
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
                 params["id_usuario"] = idUsuarioLogueado.toString()
-                params["motivo"] = getString(R.string.motivo_salud)
-                params["fecha_inasistencia"] = "2026-05-20"
+                params["motivo"] = motivoRecibido          // <--- Cambiado de Fijo a Dinámico
+                params["fecha_inasistencia"] = fechaRecibida // <--- Cambiado de Fijo a Dinámico
                 params["ruta_foto"] = archivoUri.toString()
                 return params
             }
         }
 
-        // Añadir la petición a la cola para que se ejecute
         queue.add(stringRequest)
     }
 
