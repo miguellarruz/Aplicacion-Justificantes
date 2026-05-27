@@ -10,7 +10,7 @@
         android:id="@+id/tvTituloNotificaciones"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sistema de notificaciones para cambios de estado en justificantes (Santiago)"
+        android:text="Sistema de notificaciones para cambios de estado en justificantes"
         android:textColor="#212529"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -18,12 +18,14 @@
         android:layout_marginBottom="24dp" />
 
     <LinearLayout
+        android:id="@+id/layoutEnProceso"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#CCE5FF"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_marginBottom="12dp">
+        android:layout_marginBottom="12dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
@@ -34,6 +36,7 @@
             android:textSize="15sp"/>
 
         <TextView
+            android:id="@+id/tvTextoProceso"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Tu documento ha sido recibido y actualmente se encuentra en revisión por el departamento escolar."
@@ -43,12 +46,14 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layoutAprobado"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#D4EDDA"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_marginBottom="12dp">
+        android:layout_marginBottom="12dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
@@ -59,21 +64,24 @@
             android:textSize="15sp"/>
 
         <TextView
+            android:id="@+id/tvTextoAprobado"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tu solicitud de justificante médico ha sido revisada y aprobada por el administrador."
+            android:text="Tu solicitud de justificante ha sido revisada y aprobada de manera exitosa por el administrador."
             android:textColor="#155724"
             android:textSize="13sp"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layoutRechazado"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#F8D7DA"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_marginBottom="32dp">
+        android:layout_marginBottom="32dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
@@ -84,13 +92,25 @@
             android:textSize="15sp"/>
 
         <TextView
+            android:id="@+id/tvTextoRechazado"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="El justificante del día 12/05 fue rechazado debido a que los datos ingresados son ilegibles."
+            android:text="Tu solicitud de justificante fue rechazada. Por favor, verifica que los datos o la imagen enviada sean legibles."
             android:textColor="#721C24"
             android:textSize="13sp"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvSinNotificaciones"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No tienes notificaciones o cambios de estado pendientes en este momento."
+        android:textColor="#6c757d"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:visibility="visible" />
 
     <View
         android:layout_width="match_parent"

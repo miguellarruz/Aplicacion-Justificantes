@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F4F6F9">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Módulo de Control - Enfermería CeCyTe"
+        android:textColor="#1A237E"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:id="@+id/tvSinSolicitudesEnfermera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No hay solicitudes de justificantes pendientes por revisar."
+        android:textColor="#666666"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/layoutTarjetaRevision"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="16dp"
+        android:elevation="4dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvNombreAlumnoRevision"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Alumno: [Nombre del Alumno]"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tvDetalleJustificante"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Motivo: [Cargando motivo...]\nFecha: [--/--/----]"
+            android:textColor="#666666"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btnAprobarEnfermera"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Aprobar ✅"
+                android:backgroundTint="#2E7D32"
+                android:textColor="#FFFFFF"
+                android:layout_marginRight="4dp"/>
+
+            <Button
+                android:id="@+id/btnRechazarEnfermera"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Rechazar ❌"
+                android:backgroundTint="#C62828"
+                android:textColor="#FFFFFF"
+                android:layout_marginLeft="4dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/btnCerrarSesionEnfermera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cerrar Sesión"
+        android:backgroundTint="#37474F"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>
