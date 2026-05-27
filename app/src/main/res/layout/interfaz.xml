@@ -27,10 +27,10 @@
         android:layout_marginBottom="25dp"/>
 
     <Button
-        android:id="@+id/btnIrAutenticacion"
+        android:id="@+id/btnNuevaSolicitud"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="Nueva Solicitud (Autenticación)"
+        android:text="Nueva Solicitud"
         android:textSize="15sp"
         android:textStyle="bold"
         android:backgroundTint="#1A237E"
@@ -56,7 +56,17 @@
         android:backgroundTint="#5C6BC0"
         android:textColor="#FFFFFF"/>
 
-    <!-- Scrollable container for the history items -->
+    <TextView
+        android:id="@+id/txtListaVacia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📭 Aún no tienes justificantes registrados."
+        android:textColor="#718096"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:visibility="visible" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
