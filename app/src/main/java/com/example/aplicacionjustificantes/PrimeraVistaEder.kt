@@ -1,72 +1,109 @@
 package com.example.aplicacionjustificantes
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.google.android.material.textfield.TextInputEditText
+import org.json.JSONObject
 
 class PrimeraVistaEder : AppCompatActivity() {
 
+    private lateinit var edtCorreo: TextInputEditText
+    private lateinit var edtPassword: TextInputEditText
+    private lateinit var btnIngresar: Button
+    private lateinit var txtRegistrarse: TextView
+
+    // !!! RECUERDA PONER AQUÍ LA IP DE TU COMPUTADORA !!!
+    private val URL_LOGIN = "http://192.168.2.94/justificantes_api/login.php"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.eder_vista)
+        setContentView(R.layout.eder_vista) // Tu diseño XML correspondiente
 
-        val edtCorreo = findViewById<EditText>(R.id.edtCorreoEder)
-        val edtPassword = findViewById<EditText>(R.id.edtPasswordEder)
-        val btnIngresar = findViewById<Button>(R.id.btnIngresarEder)
-        val txtRegistrarse = findViewById<TextView>(R.id.txtRegistrarseEder)
+        // Inicializar los componentes usando los IDs exactos de tu XML
+        edtCorreo = findViewById(R.id.edtCorreoEder)
+        edtPassword = findViewById(R.id.edtPasswordEder)
+        btnIngresar = findViewById(R.id.btnIngresarEder)
+        txtRegistrarse = findViewById(R.id.txtRegistrarseEder)
 
+        // Acción al presionar el botón de Ingresar
         btnIngresar.setOnClickListener {
             val correo = edtCorreo.text.toString().trim()
-            val password = edtPassword.text.toString().trim()
+            val contrasena = edtPassword.text.toString().trim()
 
-            if (correo.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // 1. FILTRO ESPECIAL: Si es el correo del personal de Enfermería
-            if (correo.equals("enfermeria@cecyteq.edu.mx", ignoreCase = true) && password == "1234") {
-                Toast.makeText(this, "Bienvenido Personal de Enfermería", Toast.LENGTH_SHORT).show()
-
-                // Redirige al panel exclusivo de la enfermera
-                val intent = Intent(this, EnfermeriaActivity::class.java)
-                startActivity(intent)
-                finish()
-                return@setOnClickListener
-            }
-
-            // 2. Filtro para Alumnos normales
-            if (correo.endsWith("@cecyteq.edu.mx")) {
-                Toast.makeText(this, "Acceso concedido", Toast.LENGTH_SHORT).show()
-
-                // Guardamos el correo o un nombre simulado en la memoria de la sesión
-                val sharedPreferences = getSharedPreferences("SesionUsuario", Context.MODE_PRIVATE)
-                val editor = sharedPreferences.edit()
-
-                // Extrae la parte antes del @ para usarlo de nombre provisional
-                val nombreExtraido = correo.substringBefore("@")
-                editor.putString("nombre_cuenta", nombreExtraido)
-                editor.apply()
-
-                // Manda a la pantalla Interfaz del Alumno
-                val intent = Intent(this, Interfaz::class.java)
-                startActivity(intent)
-                finish()
-
+            if (correo.isNotEmpty() && contrasena.isNotEmpty()) {
+                ejecutarLogin(correo, contrasena)
             } else {
-                edtCorreo.error = "Solo se permiten correos con dominio @cecyteq.edu.mx"
-                Toast.makeText(this, "Error: Debes usar tu correo institucional", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
             }
         }
 
+        // Acción para ir a la pantalla de Registro si no tiene cuenta
         txtRegistrarse.setOnClickListener {
             val intent = Intent(this, RegistroActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    private fun ejecutarLogin(correoUsuario: String, contrasenaUsuario: String) {
+        val queue = Volley.newRequestQueue(this)
+
+        val stringRequest = object : StringRequest(
+            Request.Method.POST,
+            URL_LOGIN,
+            { response ->
+                try {
+                    val jsonResponse = JSONObject(response)
+                    val status = jsonResponse.getString("status")
+                    val message = jsonResponse.getString("message")
+
+                    if (status == "success") {
+                        Toast.makeText(this@PrimeraVistaEder, message, Toast.LENGTH_SHORT).show()
+
+                        // Extraemos el rol que nos devuelve el archivo PHP
+                        val rol = jsonResponse.getString("rol")
+                        val idUsuario = jsonResponse.getInt("id_usuario")
+
+                        // Validamos el rol para decidir a dónde mandar al usuario
+                        if (rol == "Enfermeria") {
+                            // Si es de enfermería, va a su panel administrador
+                            val intent = Intent(this@PrimeraVistaEder, EnfermeriaActivity::class.java)
+                            startActivity(intent)
+                        } else {
+                            // Si es alumno, va a la interfaz principal del alumno
+                            val intent = Intent(this@PrimeraVistaEder, Interfaz::class.java)
+                            // Pasamos el ID del usuario logueado para usarlo después al subir fotos
+                            intent.putExtra("ID_USUARIO_LOGUEADO", idUsuario)
+                            startActivity(intent)
+                        }
+                        finish() // Cierra el login para que no se pueda regresar con el botón de atrás
+
+                    } else {
+                        Toast.makeText(this@PrimeraVistaEder, message, Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this@PrimeraVistaEder, "Error al procesar los datos: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            },
+            { error ->
+                Toast.makeText(this@PrimeraVistaEder, "Error de red: No se pudo conectar al servidor", Toast.LENGTH_LONG).show()
+            }
+        ) {
+            // Mandamos las variables al PHP usando POST
+            override fun getParams(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["correo"] = correoUsuario
+                params["contrasena"] = contrasenaUsuario
+                return params
+            }
+        }
+
+        queue.add(stringRequest)
     }
 }
