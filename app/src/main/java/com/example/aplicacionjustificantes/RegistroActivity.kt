@@ -13,7 +13,6 @@ import org.json.JSONObject
 
 class RegistroActivity : AppCompatActivity() {
 
-    // Declaramos las variables con 'lateinit' porque se inicializarán en el onCreate
     private lateinit var edtNombre: EditText
     private lateinit var edtMatricula: EditText
     private lateinit var edtCorreo: EditText
@@ -21,7 +20,6 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var btnRegistrar: Button
     private lateinit var txtVolverLogin: TextView
 
-    // ✅ CORREGIDO: Ahora apunta exactamente a "registrar_usuario.php" que es el nombre real en tu carpeta xampp
     private val URL_REGISTRO = "http://192.168.1.83/justificantes_api/registrar_usuario.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,20 +39,17 @@ class RegistroActivity : AppCompatActivity() {
             val correo = edtCorreo.text.toString().trim()
             val password = edtPassword.text.toString().trim()
 
-            // Validaciones locales básicas
             if (nombre.isEmpty() || matricula.isEmpty() || correo.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, getString(R.string.llena_campos), Toast.LENGTH_SHORT).show()
-            } else if (password.length < 4) { // Cambiado a 4 por si usas "1234" en tus pruebas
+            } else if (password.length < 4) {
                 Toast.makeText(this, "La contraseña debe tener al menos 4 caracteres", Toast.LENGTH_SHORT).show()
             } else if (!correo.endsWith("@cecyteq.edu.mx")) {
                 Toast.makeText(this, "Debes usar tu correo institucional @cecyteq.edu.mx", Toast.LENGTH_LONG).show()
             } else {
-                // Si pasa las validaciones, enviamos los datos al servidor XAMPP
                 ejecutarRegistro(nombre, matricula, correo, password)
             }
         }
 
-        // Evento para regresar al Login al presionar el texto
         txtVolverLogin.setOnClickListener {
             finish()
         }
@@ -73,30 +68,26 @@ class RegistroActivity : AppCompatActivity() {
                     val message = jsonResponse.getString("message")
 
                     if (status == "success") {
-                        // El PHP guardó todo con éxito en la base de datos
                         Toast.makeText(this@RegistroActivity, "¡Registro exitoso en el servidor!", Toast.LENGTH_LONG).show()
-                        finish() // Regresa automáticamente al Login
+                        finish()
                     } else {
-                        // El PHP regresó un error (por ejemplo, correo o matrícula ya existentes)
                         Toast.makeText(this@RegistroActivity, message, Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this@RegistroActivity, "Error al procesar registro: ${e.message}", Toast.LENGTH_LONG).show()
+                    // Si el servidor responde algo no válido, se mostrará la cadena completa para ver el error real
+                    Toast.makeText(this@RegistroActivity, "Respuesta del servidor: $response", Toast.LENGTH_LONG).show()
                 }
             },
             { error ->
-                // ✅ CORREGIDO: Mensaje actualizado con el nombre correcto del archivo PHP para que sea claro en el celular
                 Toast.makeText(this@RegistroActivity, "Error de red en Registro: No se pudo conectar a registrar_usuario.php", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
-                // ⚠️ Estas claves deben llamarse IGUAL a como las lee tu archivo registrar_usuario.php (ej. $_POST['correo'])
                 params["nombre"] = nom
                 params["matricula"] = mat
                 params["correo"] = corr
-                params["contrasena"] = pass // Si en tu PHP usas "password", cámbialo aquí a "password"
-                params["rol"] = "Alumno"    // Se envía el rol por defecto tal como está en tu tabla
+                params["contrasena"] = pass
                 return params
             }
         }
