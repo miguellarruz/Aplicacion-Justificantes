@@ -20,8 +20,9 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var btnIngresar: Button
     private lateinit var txtRegistrarse: TextView
 
-    // ✅ CAMBIADO: Se usa la IP especial  para conectar el emulador con XAMPP localmente
+    // ✅ IP de tu computadora configurada correctamente para pruebas en celular real
     private val URL_LOGIN = "http://192.168.1.83/justificantes_api/login.php"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.eder_vista)
@@ -113,8 +114,8 @@ class PrimeraVistaEder : AppCompatActivity() {
                 }
             },
             { error ->
-                // ✅ Toast actualizado indicando la dirección puente
-                Toast.makeText(this@PrimeraVistaEder, "Error de red: No se pudo conectar al servidor local (10.0.2.2)", Toast.LENGTH_LONG).show()
+                // ✅ CORREGIDO: Ahora el Toast te avisa sobre la IP real en lugar de la del emulador
+                Toast.makeText(this@PrimeraVistaEder, "Error de red: No se pudo conectar al servidor local (192.168.1.83)", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
