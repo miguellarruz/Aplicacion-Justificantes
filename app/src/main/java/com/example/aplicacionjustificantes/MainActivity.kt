@@ -21,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imagePreview: ImageView
 
     private var archivoUri: Uri? = null
+
+    // Se inicializará dinámicamente con el alumno real
     private var idUsuarioLogueado: Int = 1
 
     private var motivoRecibido: String = ""
@@ -50,6 +52,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // 🆔 RECUPERAR EL ID REAL DEL ALUMNO LOGUEADO (Enviado desde el Login -> Interfaz)
+        idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
+
         // Recuperar datos de la Interfaz2A
         motivoRecibido = intent.getStringExtra("EXTRA_MOTIVO") ?: "Sin motivo"
         fechaRecibida = intent.getStringExtra("EXTRA_FECHA") ?: "2026-01-01"
@@ -73,8 +78,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun guardarJustificanteEnBaseDatos() {
-        // Tu IP local está excelente para pruebas con el emulador local
-        val url = "http://192.168.2.94/justificantes_api/guardar_justificante.php"
+        // ✅ CORREGIDO: Ahora apunta a tu IP real 192.168.1.83 y al archivo correcto
+        val url = "http://192.168.1.83/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(
@@ -87,24 +92,23 @@ class MainActivity : AppCompatActivity() {
                     val message = jsonResponse.getString("message")
 
                     if (status == "success") {
-                        // Muestra el aviso de que fue enviado con éxito
                         Toast.makeText(this@MainActivity, "Éxito: $message", Toast.LENGTH_LONG).show()
-
-                        // Cierra esta actividad y regresa de golpe a la pantalla principal
-                        finish()
+                        finish() // Cierra esta actividad y regresa a la pantalla principal
                     } else {
                         Toast.makeText(this@MainActivity, "Error del servidor: $message", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "Error en respuesta: ${e.message}", Toast.LENGTH_LONG).show()
+                    // Si el PHP manda un error interno, aquí te pintará el texto completo en vez de trabarse
+                    Toast.makeText(this@MainActivity, "Respuesta del servidor: $response", Toast.LENGTH_LONG).show()
                 }
             },
             { error ->
-                Toast.makeText(this@MainActivity, "Error de red: No se pudo conectar al servidor PHP", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, "Error de red: No se pudo conectar a guardar_justificante.php", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
+                // ⚠️ Estas claves deben llamarse IGUAL a como las recibe el $_POST de tu guardar_justificante.php
                 params["id_usuario"] = idUsuarioLogueado.toString()
                 params["motivo"] = motivoRecibido
                 params["fecha_inasistencia"] = fechaRecibida
