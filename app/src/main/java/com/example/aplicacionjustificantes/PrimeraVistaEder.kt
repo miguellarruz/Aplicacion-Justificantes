@@ -1,5 +1,6 @@
 package com.example.aplicacionjustificantes
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -19,12 +20,11 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var btnIngresar: Button
     private lateinit var txtRegistrarse: TextView
 
-    // !!! RECUERDA PONER AQUÍ LA IP DE TU COMPUTADORA !!!
-    private val URL_LOGIN = "http://192.168.2.94/justificantes_api/login.php"
-
+    // ✅ CAMBIADO: Se usa la IP especial  para conectar el emulador con XAMPP localmente
+    private val URL_LOGIN = "http://192.168.1.83/justificantes_api/login.php"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.eder_vista) // Tu diseño XML correspondiente
+        setContentView(R.layout.eder_vista)
 
         // Inicializar los componentes usando los IDs exactos de tu XML
         edtCorreo = findViewById(R.id.edtCorreoEder)
@@ -37,10 +37,23 @@ class PrimeraVistaEder : AppCompatActivity() {
             val correo = edtCorreo.text.toString().trim()
             val contrasena = edtPassword.text.toString().trim()
 
-            if (correo.isNotEmpty() && contrasena.isNotEmpty()) {
+            if (correo.isEmpty() || contrasena.isEmpty()) {
+                Toast.makeText(this, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // ACCESO DIRECTO LOCAL PARA ENFERMERÍA (Por si el servidor falla o vas empezando)
+            if (correo.equals("enfermeria@cecyteq.edu.mx", ignoreCase = true) && contrasena == "1234") {
+                Toast.makeText(this, "Bienvenido Personal de Enfermería (Modo Local)", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, EnfermeriaActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else if (correo.endsWith("@cecyteq.edu.mx")) {
+                // Si es un alumno o usuario de la escuela general, hace la consulta al servidor MySQL
                 ejecutarLogin(correo, contrasena)
             } else {
-                Toast.makeText(this, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
+                edtCorreo.error = "Solo se permiten correos con dominio @cecyteq.edu.mx"
+                Toast.makeText(this, "Error: Debes usar tu correo institucional", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -66,23 +79,31 @@ class PrimeraVistaEder : AppCompatActivity() {
                     if (status == "success") {
                         Toast.makeText(this@PrimeraVistaEder, message, Toast.LENGTH_SHORT).show()
 
+                        // Guardamos el nombre en SharedPreferences para tus paneles dinámicos
+                        try {
+                            val sharedPreferences = getSharedPreferences("SesionUsuario", Context.MODE_PRIVATE)
+                            val editor = sharedPreferences.edit()
+                            val nombreExtraido = correoUsuario.substringBefore("@")
+                            editor.putString("nombre_cuenta", nombreExtraido)
+                            editor.apply()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+
                         // Extraemos el rol que nos devuelve el archivo PHP
                         val rol = jsonResponse.getString("rol")
                         val idUsuario = jsonResponse.getInt("id_usuario")
 
-                        // Validamos el rol para decidir a dónde mandar al usuario
-                        if (rol == "Enfermeria") {
-                            // Si es de enfermería, va a su panel administrador
+                        // Validamos el rol para decidir a dónde mandar al usuario desde la Base de Datos
+                        if (rol == "Enfermeria" || rol == "Administrador") {
                             val intent = Intent(this@PrimeraVistaEder, EnfermeriaActivity::class.java)
                             startActivity(intent)
                         } else {
-                            // Si es alumno, va a la interfaz principal del alumno
                             val intent = Intent(this@PrimeraVistaEder, Interfaz::class.java)
-                            // Pasamos el ID del usuario logueado para usarlo después al subir fotos
                             intent.putExtra("ID_USUARIO_LOGUEADO", idUsuario)
                             startActivity(intent)
                         }
-                        finish() // Cierra el login para que no se pueda regresar con el botón de atrás
+                        finish()
 
                     } else {
                         Toast.makeText(this@PrimeraVistaEder, message, Toast.LENGTH_LONG).show()
@@ -92,10 +113,10 @@ class PrimeraVistaEder : AppCompatActivity() {
                 }
             },
             { error ->
-                Toast.makeText(this@PrimeraVistaEder, "Error de red: No se pudo conectar al servidor", Toast.LENGTH_LONG).show()
+                // ✅ Toast actualizado indicando la dirección puente
+                Toast.makeText(this@PrimeraVistaEder, "Error de red: No se pudo conectar al servidor local (10.0.2.2)", Toast.LENGTH_LONG).show()
             }
         ) {
-            // Mandamos las variables al PHP usando POST
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
                 params["correo"] = correoUsuario
