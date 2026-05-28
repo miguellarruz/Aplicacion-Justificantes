@@ -1,73 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:gravity="center"
+    android:fillViewport="true"
     android:background="#F5F7FA">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/registro_usuario"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="#1A237E"
-        android:layout_marginBottom="20dp"/>
-
-    <EditText
-        android:id="@+id/edtNombreReg"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/nombre_completo"
-        android:inputType="textPersonName"
-        android:autofillHints="name"
-        android:layout_marginBottom="10dp"/>
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center">
 
-    <EditText
-        android:id="@+id/edtMatriculaReg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/matricula"
-        android:inputType="number"
-        android:autofillHints="none"
-        android:layout_marginBottom="10dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/registro_usuario"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#1A237E"
+            android:layout_marginBottom="30dp"/>
 
-    <EditText
-        android:id="@+id/edtCorreoReg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/correo_institucional"
-        android:inputType="textEmailAddress"
-        android:autofillHints="emailAddress"
-        android:layout_marginBottom="10dp"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/nombre_completo"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintTextColor="#1A237E"
+            app:boxStrokeColor="#1A237E">
 
-    <EditText
-        android:id="@+id/edtPasswordReg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/contrasena"
-        android:inputType="textPassword"
-        android:autofillHints="password"
-        android:layout_marginBottom="20dp"/>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtNombreReg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="#000000"
+                android:textColorHint="#555555"
+                android:autofillHints="name" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
-        android:id="@+id/btnRegistrarReg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/registrar"
-        android:backgroundTint="#1A237E"
-        android:textColor="#FFFFFF"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/matricula"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintTextColor="#1A237E"
+            app:boxStrokeColor="#1A237E">
 
-    <TextView
-        android:id="@+id/txtLoginReg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/ya_tienes_cuenta"
-        android:textColor="#5C6BC0"
-        android:layout_marginTop="15dp"
-        android:clickable="true"
-        android:focusable="true"/>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtMatriculaReg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textColor="#000000"
+                android:textColorHint="#555555"
+                android:autofillHints="none" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-</LinearLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/correo_institucional"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintTextColor="#1A237E"
+            app:boxStrokeColor="#1A237E">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtCorreoReg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="#000000"
+                android:textColorHint="#555555"
+                android:autofillHints="emailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/contrasena"
+            android:layout_marginBottom="24dp"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#1A237E"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintTextColor="#1A237E"
+            app:boxStrokeColor="#1A237E">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtPasswordReg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="#000000"
+                android:textColorHint="#555555"
+                android:autofillHints="password" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRegistrarReg"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="@string/registrar"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="8dp"
+            android:backgroundTint="#1A237E"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="15dp"/>
+
+        <TextView
+            android:id="@+id/txtLoginReg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ya_tienes_cuenta"
+            android:textColor="#1A237E"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:padding="14dp"
+            android:minHeight="48dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"/>
+
+    </LinearLayout>
+</ScrollView>

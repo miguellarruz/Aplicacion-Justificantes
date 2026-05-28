@@ -23,19 +23,18 @@ class MainActivity : AppCompatActivity() {
     private var archivoUri: Uri? = null
     private var idUsuarioLogueado: Int = 1
 
-    // Variables para recibir lo que escribió el alumno en la Interfaz2A
     private var motivoRecibido: String = ""
     private var fechaRecibida: String = ""
 
     private val seleccionarArchivoLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
+        ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK && result.data != null) {
             val data: Intent? = result.data
             archivoUri = data?.data
 
             if (archivoUri != null) {
-                txtArchivo.text = getString(R.string.archivo_seleccionado)
+                txtArchivo.text = "¡Archivo listo para enviar!"
                 val tipo = contentResolver.getType(archivoUri!!)
 
                 if (tipo != null && tipo.startsWith("image/")) {
@@ -51,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // !!! AQUÍ RECUPERAMOS LOS DATOS DE LA PANTALLA ANTERIOR !!!
+        // Recuperar datos de la Interfaz2A
         motivoRecibido = intent.getStringExtra("EXTRA_MOTIVO") ?: "Sin motivo"
         fechaRecibida = intent.getStringExtra("EXTRA_FECHA") ?: "2026-01-01"
 
@@ -68,12 +67,13 @@ class MainActivity : AppCompatActivity() {
             if (archivoUri != null) {
                 guardarJustificanteEnBaseDatos()
             } else {
-                Toast.makeText(this, getString(R.string.selecciona_archivo_primero), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Por favor, selecciona una foto primero", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun guardarJustificanteEnBaseDatos() {
+        // Tu IP local está excelente para pruebas con el emulador local
         val url = "http://192.168.2.94/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
@@ -87,26 +87,27 @@ class MainActivity : AppCompatActivity() {
                     val message = jsonResponse.getString("message")
 
                     if (status == "success") {
-                        Toast.makeText(this@MainActivity, getString(R.string.exito_mensaje, message), Toast.LENGTH_LONG).show()
-                        finish() // Cierra esta pantalla y regresa al inicio tras el éxito
+                        // Muestra el aviso de que fue enviado con éxito
+                        Toast.makeText(this@MainActivity, "Éxito: $message", Toast.LENGTH_LONG).show()
+
+                        // Cierra esta actividad y regresa de golpe a la pantalla principal
+                        finish()
                     } else {
-                        Toast.makeText(this@MainActivity, getString(R.string.error_servidor, message), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@MainActivity, "Error del servidor: $message", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, getString(R.string.error_procesar_respuesta, e.message), Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MainActivity, "Error en respuesta: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             },
-            { _ ->
-                Toast.makeText(this@MainActivity, getString(R.string.error_red), Toast.LENGTH_LONG).show()
-            },
+            { error ->
+                Toast.makeText(this@MainActivity, "Error de red: No se pudo conectar al servidor PHP", Toast.LENGTH_LONG).show()
+            }
         ) {
-
-            // !!! AQUÍ PONEMOS LOS DATOS ENVIADOS DESDE INTERFAZ2A !!!
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
                 params["id_usuario"] = idUsuarioLogueado.toString()
-                params["motivo"] = motivoRecibido          // <--- Cambiado de Fijo a Dinámico
-                params["fecha_inasistencia"] = fechaRecibida // <--- Cambiado de Fijo a Dinámico
+                params["motivo"] = motivoRecibido
+                params["fecha_inasistencia"] = fechaRecibida
                 params["ruta_foto"] = archivoUri.toString()
                 return params
             }
@@ -121,6 +122,6 @@ class MainActivity : AppCompatActivity() {
             val tiposPermitidos = arrayOf("image/jpeg", "image/png", "application/pdf")
             putExtra(Intent.EXTRA_MIME_TYPES, tiposPermitidos)
         }
-        seleccionarArchivoLauncher.launch(Intent.createChooser(intent, getString(R.string.selecciona_justificante)))
+        seleccionarArchivoLauncher.launch(Intent.createChooser(intent, "Selecciona tu justificante"))
     }
 }

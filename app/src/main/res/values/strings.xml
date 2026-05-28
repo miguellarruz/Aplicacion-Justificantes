@@ -19,4 +19,9 @@
     <string name="error_password_corta">La contraseña debe tener al menos 6 caracteres</string>
     <string name="registro_exitoso">¡Registro exitoso para %1$s!</string>
     <string name="motivo_format">Motivo: %1$s</string>
+    <string name="cecyte_qro">CeCyTe Qro</string>
+    <string name="plataforma_justificantes">Plataforma de Justificantes</string>
+    <string name="hint_email">tu_usuario@cecyteq.edu.mx</string>
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="no_tienes_cuenta">¿No tienes cuenta? Regístrate aquí</string>
 </resources>
