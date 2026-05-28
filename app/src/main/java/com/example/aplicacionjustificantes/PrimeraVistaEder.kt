@@ -20,7 +20,7 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var btnIngresar: Button
     private lateinit var txtRegistrarse: TextView
 
-    // ✅ IP de tu computadora configurada correctamente para pruebas en celular real
+    // ✅ CONFIGURADO: Apunta exactamente al archivo login.php dentro de tu servidor XAMPP local
     private val URL_LOGIN = "http://192.168.1.83/justificantes_api/login.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,8 +114,8 @@ class PrimeraVistaEder : AppCompatActivity() {
                 }
             },
             { error ->
-                // ✅ CORREGIDO: Ahora el Toast te avisa sobre la IP real en lugar de la del emulador
-                Toast.makeText(this@PrimeraVistaEder, "Error de red: No se pudo conectar al servidor local (192.168.1.83)", Toast.LENGTH_LONG).show()
+                // ✅ CORREGIDO: Mensaje ultra claro con el archivo exacto de tu carpeta
+                Toast.makeText(this@PrimeraVistaEder, "Error de red en Login: No se pudo conectar a login.php (IP: 192.168.1.83)", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {

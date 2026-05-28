@@ -21,8 +21,8 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var btnRegistrar: Button
     private lateinit var txtVolverLogin: TextView
 
-    // ✅ URL configurada con tu IP real para conectar con el registro.php de XAMPP
-    private val URL_REGISTRO = "http://192.168.1.83/justificantes_api/registro.php"
+    // ✅ CORREGIDO: Ahora apunta exactamente a "registrar_usuario.php" que es el nombre real en tu carpeta xampp
+    private val URL_REGISTRO = "http://192.168.1.83/justificantes_api/registrar_usuario.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +49,7 @@ class RegistroActivity : AppCompatActivity() {
             } else if (!correo.endsWith("@cecyteq.edu.mx")) {
                 Toast.makeText(this, "Debes usar tu correo institucional @cecyteq.edu.mx", Toast.LENGTH_LONG).show()
             } else {
-                // ✅ Si pasa las validaciones, enviamos los datos al servidor XAMPP
+                // Si pasa las validaciones, enviamos los datos al servidor XAMPP
                 ejecutarRegistro(nombre, matricula, correo, password)
             }
         }
@@ -85,13 +85,13 @@ class RegistroActivity : AppCompatActivity() {
                 }
             },
             { error ->
-                // Muestra un aviso claro en caso de que falle la red local
-                Toast.makeText(this@RegistroActivity, "Error de red en Registro: No se pudo conectar a la IP 192.168.1.83", Toast.LENGTH_LONG).show()
+                // ✅ CORREGIDO: Mensaje actualizado con el nombre correcto del archivo PHP para que sea claro en el celular
+                Toast.makeText(this@RegistroActivity, "Error de red en Registro: No se pudo conectar a registrar_usuario.php", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
-                // ⚠️ Estas claves deben llamarse IGUAL a como las lee tu archivo registro.php (ej. $_POST['correo'])
+                // ⚠️ Estas claves deben llamarse IGUAL a como las lee tu archivo registrar_usuario.php (ej. $_POST['correo'])
                 params["nombre"] = nom
                 params["matricula"] = mat
                 params["correo"] = corr
