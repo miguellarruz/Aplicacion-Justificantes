@@ -139,8 +139,9 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // 📌 MODIFICADO: Se fuerza la ruta de envío explícita com.android.volley.Request.Method.POST
         val stringRequest = object : StringRequest(
-            Method.POST,
+            com.android.volley.Request.Method.POST,
             url,
             { response ->
                 try {
