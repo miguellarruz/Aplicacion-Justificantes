@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
@@ -24,7 +25,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnEnviar: Button
     private lateinit var txtArchivo: TextView
     private lateinit var imagePreview: ImageView
-    private lateinit var txtInstruccionFoto: TextView
 
     private var archivoUri: Uri? = null
 
@@ -40,13 +40,10 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK && result.data != null) {
-            val data: Intent? = result.data
-            archivoUri = data?.data
-
+            archivoUri = result.data?.data
             if (archivoUri != null) {
                 txtArchivo.text = "¡Archivo listo para enviar!"
                 val tipo = contentResolver.getType(archivoUri!!)
-
                 if (tipo != null && tipo.startsWith("image/")) {
                     imagePreview.setImageURI(archivoUri)
                 } else {
@@ -64,7 +61,6 @@ class MainActivity : AppCompatActivity() {
         motivoRecibido = intent.getStringExtra("EXTRA_MOTIVO") ?: "Sin motivo"
         fechaRecibida = intent.getStringExtra("EXTRA_FECHA") ?: "2026-01-01"
         tipoJustificanteRecibido = intent.getStringExtra("EXTRA_TIPO") ?: ""
-
         institucionRecibida = intent.getStringExtra("EXTRA_INSTITUCION") ?: "No especificado"
         cedulaRecibida = intent.getStringExtra("EXTRA_CEDULA") ?: "No especificado"
 
@@ -78,12 +74,10 @@ class MainActivity : AppCompatActivity() {
             txtArchivo.text = "⚠️ Para asuntos personales es obligatorio adjuntar la credencial INE de tu tutor."
         } else {
             btnSeleccionar.text = "Subir Receta Médica"
-            txtArchivo.text = "Por favor, adjunta la foto de tu receta o constancia médica médica."
+            txtArchivo.text = "Por favor, adjunta la foto de tu receta o constancia médica."
         }
 
-        btnSeleccionar.setOnClickListener {
-            seleccionarArchivo()
-        }
+        btnSeleccionar.setOnClickListener { seleccionarArchivo() }
 
         btnEnviar.setOnClickListener {
             if (archivoUri != null) {
@@ -99,30 +93,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 📌 OPTIMIZADO: Abre la imagen, reduce su escala y la comprime en calidad para que no sature Volley
     private fun convertirUriABase64(uri: Uri?): String {
         if (uri == null) return ""
         return try {
             val inputStream: InputStream? = contentResolver.openInputStream(uri)
-
-            // Decodificar la imagen reduciendo sus dimensiones si es muy enorme (escala)
-            val opciones = BitmapFactory.Options().apply {
-                inSampleSize = 2 // Reduce el tamaño a la mitad (píxeles) optimizando la RAM
-            }
+            val opciones = BitmapFactory.Options().apply { inSampleSize = 2 }
             val bitmapOriginal = BitmapFactory.decodeStream(inputStream, null, opciones)
             inputStream?.close()
 
             if (bitmapOriginal != null) {
                 val outputStream = ByteArrayOutputStream()
-                // Comprimir al 70% de calidad en formato JPEG (mantiene legibilidad de la receta y reduce el peso un 90%)
                 bitmapOriginal.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
                 val bytesComprimidos = outputStream.toByteArray()
                 outputStream.close()
-
                 Base64.encodeToString(bytesComprimidos, Base64.DEFAULT)
             } else ""
         } catch (e: Exception) {
-            e.printStackTrace()
             ""
         }
     }
@@ -130,8 +116,6 @@ class MainActivity : AppCompatActivity() {
     private fun guardarJustificanteEnBaseDatos() {
         val url = "http://192.168.1.83/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
-
-        // Ahora obtendremos una cadena Base64 ultra ligera y totalmente válida
         val fotoBase64 = convertirUriABase64(archivoUri)
 
         if (fotoBase64.isEmpty()) {
@@ -139,11 +123,11 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // 📌 MODIFICADO: Se fuerza la ruta de envío explícita com.android.volley.Request.Method.POST
+        // 📌 Forzamos el método POST de Volley de forma clara y directa
         val stringRequest = object : StringRequest(
             com.android.volley.Request.Method.POST,
             url,
-            { response ->
+            Response.Listener { response ->
                 try {
                     val jsonResponse = JSONObject(response)
                     val status = jsonResponse.getString("status")
@@ -153,14 +137,14 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity, "¡Éxito!: $message", Toast.LENGTH_LONG).show()
                         finish()
                     } else {
-                        Toast.makeText(this@MainActivity, "Error del servidor: $message", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, "Error: $message", Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "Respuesta: $response", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MainActivity, "Respuesta del servidor: $response", Toast.LENGTH_LONG).show()
                 }
             },
-            { error ->
-                Toast.makeText(this@MainActivity, "Error de red al conectar con guardar_justificante.php", Toast.LENGTH_LONG).show()
+            Response.ErrorListener {
+                Toast.makeText(this@MainActivity, "Error de red al conectar con el servidor", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
@@ -173,6 +157,12 @@ class MainActivity : AppCompatActivity() {
                 params["ruta_foto"] = fotoBase64
                 return params
             }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/x-www-form-urlencoded"
+                return headers
+            }
         }
 
         queue.add(stringRequest)
@@ -181,8 +171,7 @@ class MainActivity : AppCompatActivity() {
     private fun seleccionarArchivo() {
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "*/*"
-            val tiposPermitidos = arrayOf("image/jpeg", "image/png")
-            putExtra(Intent.EXTRA_MIME_TYPES, tiposPermitidos)
+            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png"))
         }
         seleccionarArchivoLauncher.launch(Intent.createChooser(intent, "Selecciona tu justificante"))
     }

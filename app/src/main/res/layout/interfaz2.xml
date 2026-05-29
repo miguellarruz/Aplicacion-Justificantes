@@ -21,17 +21,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Datos del Justificante"
-            android:textSize="24sp"
+            android:textSize="26sp"
             android:textStyle="bold"
-            android:textColor="#1A202C"
+            android:textColor="#000000"
             android:layout_marginBottom="28dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Selecciona el tipo de asunto:"
-            android:textColor="#4A5568"
-            android:textSize="14sp"
+            android:textColor="#2D3748"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
 
@@ -43,7 +43,7 @@
             app:cardBackgroundColor="#FFFFFF"
             app:cardElevation="2dp"
             app:strokeWidth="1.5dp"
-            app:strokeColor="#A0AEC0">
+            app:strokeColor="#4A5568">
 
             <Spinner
                 android:id="@+id/spinnerTipo"
@@ -58,11 +58,15 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Motivo (Ej. Gripe, Trámite familiar)"
+            app:hintTextColor="#1A237E"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etMotivo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="16sp"
                 android:inputType="text"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -71,11 +75,15 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Fecha de la falta (Ej. 2026-05-28)"
+            app:hintTextColor="#1A237E"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etFecha"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="16sp"
                 android:inputType="date"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -91,11 +99,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Institución Médica (Ej. IMSS, ISSSTE)"
+                app:hintTextColor="#1A237E"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etInstitucion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
                     android:inputType="text"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -104,11 +116,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Cédula del Médico"
+                app:hintTextColor="#1A237E"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etCedula"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
                     android:inputType="number"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -119,12 +135,16 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="28dp"
             android:hint="Explica detalladamente la situación"
+            app:hintTextColor="#1A237E"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDetalles"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="16sp"
                 android:inputType="textMultiLine"
                 android:lines="3"/>
         </com.google.android.material.textfield.TextInputLayout>
