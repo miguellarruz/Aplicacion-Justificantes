@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     private var cedulaRecibida: String = "No especificado"
 
     // 🌐 TU NUEVA IP DE RED ACTUALIZADA
-    private val IP_SERVIDOR = "192.168.2.155"
+    private val IP_SERVIDOR = "192.168.43.196"
 
     private val seleccionarArchivoLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()

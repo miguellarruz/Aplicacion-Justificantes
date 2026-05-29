@@ -18,7 +18,7 @@ class Notification : AppCompatActivity() {
     private var idUsuarioLogueado: Int = 1
 
     // 🌐 TU NUEVA IP DE RED ACTUALIZADA
-    private val IP_SERVIDOR = "192.168.2.155"
+    private val IP_SERVIDOR = "192.168.43.196"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

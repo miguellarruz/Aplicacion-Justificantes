@@ -21,7 +21,7 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var txtRegistrarse: TextView
 
     // 🌐 TU NUEVA IP DE RED ACTUALIZADA
-    private val IP_SERVIDOR = "192.168.2.155"
+    private val IP_SERVIDOR = "192.168.43.196"
 
     // ✅ CONFIGURADO: Apunta de forma dinámica a tu servidor XAMPP actual
     private val URL_LOGIN = "http://$IP_SERVIDOR/justificantes_api/login.php"
