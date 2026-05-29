@@ -26,7 +26,7 @@ class Interfaz2A : AppCompatActivity() {
     private lateinit var etDetalles: EditText
     private lateinit var btnSiguiente: Button
 
-    // 📌 Variable agregada para no perder el rastro del usuario
+    // 📌 ID del usuario que viaja a través de la aplicación
     private var idUsuarioLogueado: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ class Interfaz2A : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.interfaz2)
 
-        // 📌 RECUPERAMOS EL ID REAL QUE VIENE DESDE "Interfaz"
+        // 📌 Recuperamos el ID real asignado en el Login
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -80,13 +80,14 @@ class Interfaz2A : AppCompatActivity() {
             var institucionText = "N/A"
             var cedulaText = "N/A"
 
-            // Validaciones según el tipo de motivo
+            // Validaciones básicas de los campos principales
             if (motivoText.isEmpty() || fechaText.isEmpty() || detallesText.isEmpty()) {
                 Toast.makeText(this, "Por favor completa los campos requeridos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (spinnerTipo.selectedItemPosition == 0) { // Si es Médico
+            // Validación estricta si se seleccionó Asunto Médico
+            if (spinnerTipo.selectedItemPosition == 0) {
                 institucionText = etInstitucion.text.toString().trim()
                 cedulaText = etCedula.text.toString().trim()
 
@@ -96,12 +97,10 @@ class Interfaz2A : AppCompatActivity() {
                 }
             }
 
-            // Si pasa las validaciones, mandamos todo al MainActivity
+            // Empaquetamos todo y lo mandamos a la pantalla de la fotografía
             val intent = Intent(this, MainActivity::class.java).apply {
-                // 📌 METEMOS EL ID DEL USUARIO AL INTENT PARA QUE LLEGUE AL MAINACTIVITY
                 putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
-
-                putExtra("EXTRA_TIPO", tipoJustificante)
+                putExtra("EXTRA_TIPO", tipoJustificante) // El MainActivity leerá esto para exigir el INE o la Receta
                 putExtra("EXTRA_MOTIVO", motivoText)
                 putExtra("EXTRA_INSTITUCION", institucionText)
                 putExtra("EXTRA_CEDULA", cedulaText)
@@ -109,7 +108,7 @@ class Interfaz2A : AppCompatActivity() {
                 putExtra("EXTRA_DETALLES", detallesText)
             }
             startActivity(intent)
-            finish() // Cierra el formulario para mantener limpia la pila de pantallas
+            finish() // Limpiamos la pila de pantallas para optimizar la app
         }
     }
 }

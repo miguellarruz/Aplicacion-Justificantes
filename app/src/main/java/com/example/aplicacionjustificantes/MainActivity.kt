@@ -19,12 +19,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnEnviar: Button
     private lateinit var txtArchivo: TextView
     private lateinit var imagePreview: ImageView
+    private lateinit var txtInstruccionFoto: TextView // 📌 Nueva vista para la instrucción
 
     private var archivoUri: Uri? = null
 
     private var idUsuarioLogueado: Int = 1
     private var motivoRecibido: String = ""
     private var fechaRecibida: String = ""
+    private var tipoJustificanteRecibido: String = "" // 📌 Para saber si es médico o personal
 
     private val seleccionarArchivoLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -50,15 +52,30 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 📌 RECUPERAMOS LOS DATOS COMPLETOS HEREDADOS DESDE INTERFAZ 2A
+        // RECUPERAMOS LOS DATOS COMPLETOS
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
         motivoRecibido = intent.getStringExtra("EXTRA_MOTIVO") ?: "Sin motivo"
         fechaRecibida = intent.getStringExtra("EXTRA_FECHA") ?: "2026-01-01"
+        tipoJustificanteRecibido = intent.getStringExtra("EXTRA_TIPO") ?: "" // 📌 Atrapamos el tipo
 
         btnSeleccionar = findViewById(R.id.btnSeleccionar)
         btnEnviar = findViewById(R.id.btnEnviar)
         txtArchivo = findViewById(R.id.txtArchivo)
         imagePreview = findViewById(R.id.imagePreview)
+
+        // 📌 Opcional: Si tienes un TextView arriba del botón para dar instrucciones, vincúlalo aquí.
+        // Si no tienes uno, el programa modificará directamente el botón de seleccionar archivo para dar la orden.
+
+        // 📌 CAMBIO DINÁMICO: Evaluamos qué tipo de asunto es para cambiar la instrucción de la foto
+        if (tipoJustificanteRecibido.contains("Personal", ignoreCase = true)) {
+            // Es asunto personal/familiar
+            btnSeleccionar.text = "Subir INE del Padre/Tutor"
+            txtArchivo.text = "⚠️ Para asuntos personales es obligatorio adjuntar la credencial INE de tu tutor."
+        } else {
+            // Es asunto médico
+            btnSeleccionar.text = "Subir Receta Médica"
+            txtArchivo.text = "Por favor, adjunta la foto de tu receta o constancia médica médica."
+        }
 
         btnSeleccionar.setOnClickListener {
             seleccionarArchivo()
@@ -68,7 +85,13 @@ class MainActivity : AppCompatActivity() {
             if (archivoUri != null) {
                 guardarJustificanteEnBaseDatos()
             } else {
-                Toast.makeText(this, "Por favor, selecciona una foto primero", Toast.LENGTH_SHORT).show()
+                // 📌 Mensaje de error personalizado según el caso
+                val mensajeError = if (tipoJustificanteRecibido.contains("Personal", ignoreCase = true)) {
+                    "Por favor, selecciona la foto de la credencial INE de tu tutor"
+                } else {
+                    "Por favor, selecciona la foto de tu receta médica"
+                }
+                Toast.makeText(this, mensajeError, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -102,7 +125,6 @@ class MainActivity : AppCompatActivity() {
         ) {
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
-                // 📌 Claves idénticas a como las lee tu $_POST['...'] en el archivo PHP
                 params["id_usuario"] = idUsuarioLogueado.toString()
                 params["motivo"] = motivoRecibido
                 params["fecha_inasistencia"] = fechaRecibida
