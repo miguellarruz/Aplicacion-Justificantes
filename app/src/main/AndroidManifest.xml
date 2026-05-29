@@ -49,6 +49,10 @@
             android:name=".Notification"
             android:exported="false" />
 
+        <activity
+            android:name=".PaneldeVisualizacion"
+            android:exported="false" />
+
     </application>
 
 </manifest>
