@@ -94,8 +94,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Aprobar ✅"
-                android:backgroundTint="#2E7D32"
+                android:text="Aprobar"
+                android:background="#2E7D32"
                 android:textColor="#FFFFFF"
                 android:layout_marginRight="4dp"/>
 
@@ -104,8 +104,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Rechazar ❌"
-                android:backgroundTint="#C62828"
+                android:text="Rechazar"
+                android:background="#C62828"
                 android:textColor="#FFFFFF"
                 android:layout_marginLeft="4dp"/>
         </LinearLayout>
@@ -113,7 +113,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="dp"
+        android:layout_height="0dp"
         android:layout_weight="1" />
 
     <Button
@@ -121,7 +121,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cerrar Sesión"
-        android:backgroundTint="#37474F"
+        android:background="#37474F"
         android:textColor="#FFFFFF" />
 
 </LinearLayout>
