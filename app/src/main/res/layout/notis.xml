@@ -30,7 +30,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔄 Justificante En Proceso"
+            android:text="Justificante En Proceso"
             android:textColor="#004085"
             android:textStyle="bold"
             android:textSize="15sp"/>
@@ -58,7 +58,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="✅ Justificante Aprobado"
+            android:text="Justificante Aprobado"
             android:textColor="#155724"
             android:textStyle="bold"
             android:textSize="15sp"/>
@@ -86,7 +86,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="❌ Justificante Rechazado"
+            android:text="Justificante Rechazado"
             android:textColor="#721C24"
             android:textStyle="bold"
             android:textSize="15sp"/>
@@ -122,7 +122,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Regresar a Interfaz"
-        android:backgroundTint="#6c757d"
+        android:background="#6c757d"
         android:textColor="#FFFFFF"
         android:textStyle="bold" />
 
