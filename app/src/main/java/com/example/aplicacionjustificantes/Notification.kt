@@ -17,6 +17,9 @@ class Notification : AppCompatActivity() {
     private lateinit var txtNotisVacias: TextView
     private var idUsuarioLogueado: Int = 1
 
+    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    private val IP_SERVIDOR = "192.168.2.155"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Asegúrate de que tu XML de notificaciones se llame "notis" o cámbialo por el nombre correcto
@@ -35,8 +38,8 @@ class Notification : AppCompatActivity() {
     private fun cargarNotificaciones() {
         contenedorNotificaciones.removeAllViews()
 
-        //  Usando tu IP local corregida 192.168.1.83
-        val url = "http://192.168.56.1/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
+        // 🔥 CORREGIDO: Ahora usa la variable dinámica con tu IP real activa de la red
+        val url = "http://$IP_SERVIDOR/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,
@@ -81,7 +84,7 @@ class Notification : AppCompatActivity() {
         val txtMotivo = vistaNoti.findViewById<TextView>(R.id.txtMotivoJustificante)
 
         // Personalizamos el diseño según la respuesta del administrador
-        if (estatus.equals("Aceptado", ignoreCase = true)) {
+        if (estatus.equals("Aceptado", ignoreCase = true) || estatus.equals("Aprobado", ignoreCase = true)) {
             txtTitulo.text = "SOLICITUD APROBADA"
             txtTitulo.setTextColor(android.graphics.Color.parseColor("#2E7D32")) // Verde
         } else {

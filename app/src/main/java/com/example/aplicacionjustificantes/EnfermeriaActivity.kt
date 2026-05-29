@@ -27,6 +27,9 @@ class EnfermeriaActivity : AppCompatActivity() {
 
     private var idJustificanteActual: Int = -1
 
+    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    private val IP_SERVIDOR = "192.168.2.155"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.enfermeria_panel)
@@ -63,13 +66,15 @@ class EnfermeriaActivity : AppCompatActivity() {
 
         btnCerrarSesion.setOnClickListener {
             val intent = Intent(this, PrimeraVistaEder::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
         }
     }
 
     private fun cargarJustificantePendiente() {
-        val url = "http://192.168.56.1/justificantes_api/obtener_estado_justificante.php"
+        // Usa la variable dinámica con la nueva IP
+        val url = "http://$IP_SERVIDOR/justificantes_api/obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,
@@ -92,14 +97,14 @@ class EnfermeriaActivity : AppCompatActivity() {
                         tvDetalleJustificante.text = "Motivo: $motivo\nFecha Inasistencia: $fechaInasistencia"
                         tvDatosExtraRevision.text = "Institución médica/Lugar: $institucion\nCédula Profesional: $cedula"
 
-                        // 2. 📌 DECODIFICAR FOTO BASE64 A IMAGEN EN VIVO
+                        // 2. DECODIFICAR FOTO BASE64 A IMAGEN EN VIVO
                         if (fotoBase64.isNotEmpty()) {
                             try {
                                 val decodedString = Base64.decode(fotoBase64, Base64.DEFAULT)
                                 val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
                                 ivEvidenciaEnfermera.setImageBitmap(decodedByte)
                             } catch (e: Exception) {
-                                ivEvidenciaEnfermera.setImageResource(android.R.drawable.ic_menu_gallery) // Icono default si falla
+                                ivEvidenciaEnfermera.setImageResource(android.R.drawable.ic_menu_gallery)
                             }
                         } else {
                             ivEvidenciaEnfermera.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
@@ -131,7 +136,8 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun actualizarEstatusEnServidor(nuevoEstatus: String) {
-        val url = "http://192.168.56.1/justificantes_api/actualizar_justificante.php"
+        // Usa la variable dinámica con la nueva IP
+        val url = "http://$IP_SERVIDOR/justificantes_api/actualizar_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,

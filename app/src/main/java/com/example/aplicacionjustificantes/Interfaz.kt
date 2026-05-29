@@ -20,6 +20,9 @@ class Interfaz : AppCompatActivity() {
 
     private var idUsuarioLogueado: Int = 1
 
+    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    private val IP_SERVIDOR = "192.168.2.155"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.interfaz)
@@ -73,8 +76,8 @@ class Interfaz : AppCompatActivity() {
         // Limpiamos la lista anterior para que no se dupliquen las tarjetas visuales
         contenedorLista.removeAllViews()
 
-        // ✅ IP CORREGIDA PARA CELULAR FÍSICO
-        val url = "http://192.168.56.1/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
+        // 🔥 CORREGIDO: Ahora apunta de forma segura a tu red local actual
+        val url = "http://$IP_SERVIDOR/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,

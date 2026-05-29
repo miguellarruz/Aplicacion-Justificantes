@@ -1,6 +1,7 @@
 package com.example.aplicacionjustificantes
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -20,7 +21,11 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var btnRegistrar: Button
     private lateinit var txtVolverLogin: TextView
 
-    private val URL_REGISTRO = "http://192.168.56.1/justificantes_api/registrar_usuario.php"
+    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    private val IP_SERVIDOR = "192.168.2.155"
+
+    // ✅ CONFIGURADO: Apunta dinámicamente a tu servidor local actual
+    private val URL_REGISTRO = "http://$IP_SERVIDOR/justificantes_api/registrar_usuario.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +84,8 @@ class RegistroActivity : AppCompatActivity() {
                 }
             },
             { error ->
-                Toast.makeText(this@RegistroActivity, "Error de red en Registro: No se pudo conectar a registrar_usuario.php", Toast.LENGTH_LONG).show()
+                // 🔥 CORREGIDO: Mensaje interactivo que muestra con qué IP falló la conexión
+                Toast.makeText(this@RegistroActivity, "Error de red en Registro: No se pudo conectar a registrar_usuario.php (IP: $IP_SERVIDOR)", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {

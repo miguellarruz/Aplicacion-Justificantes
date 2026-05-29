@@ -36,6 +36,9 @@ class MainActivity : AppCompatActivity() {
     private var institucionRecibida: String = "No especificado"
     private var cedulaRecibida: String = "No especificado"
 
+    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    private val IP_SERVIDOR = "192.168.2.155"
+
     private val seleccionarArchivoLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -114,7 +117,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun guardarJustificanteEnBaseDatos() {
-        val url = "http://192.168.56.1/justificantes_api/guardar_justificante.php"
+        // 🔥 CORREGIDO: Ahora usa la variable dinámica con tu IP real activa
+        val url = "http://$IP_SERVIDOR/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
         val fotoBase64 = convertirUriABase64(archivoUri)
 
@@ -123,7 +127,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // 📌 Forzamos el método POST de Volley de forma clara y directa
         val stringRequest = object : StringRequest(
             com.android.volley.Request.Method.POST,
             url,

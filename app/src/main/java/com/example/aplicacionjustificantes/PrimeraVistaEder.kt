@@ -20,8 +20,11 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var btnIngresar: Button
     private lateinit var txtRegistrarse: TextView
 
-    // ✅ CONFIGURADO: Apunta exactamente al archivo login.php dentro de tu servidor XAMPP local
-    private val URL_LOGIN = "http://192.168.56.1/justificantes_api/login.php"
+    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    private val IP_SERVIDOR = "192.168.2.155"
+
+    // ✅ CONFIGURADO: Apunta de forma dinámica a tu servidor XAMPP actual
+    private val URL_LOGIN = "http://$IP_SERVIDOR/justificantes_api/login.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,8 +117,8 @@ class PrimeraVistaEder : AppCompatActivity() {
                 }
             },
             { error ->
-                // ✅ CORREGIDO: Mensaje ultra claro con el archivo exacto de tu carpeta
-                Toast.makeText(this@PrimeraVistaEder, "Error de red en Login: No se pudo conectar a login.php (IP: 192.168.1.83)", Toast.LENGTH_LONG).show()
+                // 🔥 CORREGIDO: Mensaje con la IP dinámica real de tu red actual
+                Toast.makeText(this@PrimeraVistaEder, "Error de red en Login: No se pudo conectar a login.php (IP: $IP_SERVIDOR)", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
