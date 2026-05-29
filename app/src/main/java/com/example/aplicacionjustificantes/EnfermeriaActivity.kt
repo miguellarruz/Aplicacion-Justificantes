@@ -2,7 +2,9 @@ package com.example.aplicacionjustificantes
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -13,19 +15,28 @@ import org.json.JSONObject
 
 class EnfermeriaActivity : AppCompatActivity() {
 
-    private lateinit var tvStatus: TextView
+    private lateinit var tvSinSolicitudesEnfermera: TextView
+    private lateinit var layoutTarjetaRevision: LinearLayout
+    private lateinit var tvNombreAlumnoRevision: TextView
+    private lateinit var tvDetalleJustificante: TextView
+
     private var idJustificanteActual: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.enfermeria_panel)
 
+        // Vincular todos los componentes del XML
+        tvSinSolicitudesEnfermera = findViewById(R.id.tvSinSolicitudesEnfermera)
+        layoutTarjetaRevision = findViewById(R.id.layoutTarjetaRevision)
+        tvNombreAlumnoRevision = findViewById(R.id.tvNombreAlumnoRevision)
+        tvDetalleJustificante = findViewById(R.id.tvDetalleJustificante)
+
         val btnAprobar = findViewById<Button>(R.id.btnAprobarEnfermera)
         val btnRechazar = findViewById<Button>(R.id.btnRechazarEnfermera)
         val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesionEnfermera)
-        tvStatus = findViewById(R.id.tvNombreAlumnoRevision)
 
-        // 📌 Al abrir la pantalla, busca el justificante pendiente en HeidiSQL
+        // 📌 Buscamos el justificante pendiente en HeidiSQL al iniciar
         cargarJustificantePendiente()
 
         btnAprobar.setOnClickListener {
@@ -55,7 +66,6 @@ class EnfermeriaActivity : AppCompatActivity() {
         val url = "http://192.168.1.83/justificantes_api/obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
-        // 📌 MODIFICADO: Cambiado a StringRequest de tipo POST para acoplarse al PHP unificado
         val stringRequest = object : StringRequest(Method.POST, url,
             { response ->
                 try {
@@ -67,23 +77,30 @@ class EnfermeriaActivity : AppCompatActivity() {
                         val alumno = jsonResponse.getString("nombre_alumno")
                         val motivo = jsonResponse.getString("motivo")
 
-                        // 📌 Coloca de forma dinámica el nombre del alumno y motivo real de la BD
-                        tvStatus.text = "Revisando a: $alumno\nMotivo: $motivo"
+                        // 1. Inyectamos los datos reales en los TextViews del XML
+                        tvNombreAlumnoRevision.text = "Alumno: $alumno"
+                        tvDetalleJustificante.text = "Motivo: $motivo"
+
+                        // 2. 📌 MÁGIA: Escondemos el mensaje de "No hay" y mostramos la tarjeta blanca con los botones
+                        tvSinSolicitudesEnfermera.visibility = View.GONE
+                        layoutTarjetaRevision.visibility = View.VISIBLE
+
                     } else {
-                        idJustificanteActual = -1
-                        val msg = jsonResponse.optString("message", "No hay justificantes pendientes por revisar")
-                        tvStatus.text = msg
+                        // Si el servidor responde que está vacío, regresamos al estado inicial
+                        mostrarPantallaVacia()
                     }
                 } catch (e: Exception) {
-                    // 📌 DIAGNÓSTICO: Si el PHP responde algo raro, aquí verás el texto crudo en lugar de una pantalla en blanco
-                    tvStatus.text = "Error de respuesta. Respuesta cruda:\n$response"
+                    // Si ocurre un error de lectura, mostramos el mensaje de error crudo en el texto
+                    idJustificanteActual = -1
+                    tvSinSolicitudesEnfermera.text = "Error al procesar los datos del servidor."
+                    tvSinSolicitudesEnfermera.visibility = View.VISIBLE
+                    layoutTarjetaRevision.visibility = View.GONE
                 }
             },
             { error ->
                 Toast.makeText(this, "Error de red al conectar con Enfermería", Toast.LENGTH_SHORT).show()
             }
         ) {
-            // Mandamos los parámetros vacíos porque para Enfermería queremos todos los registros pendientes de forma general
             override fun getParams(): MutableMap<String, String> {
                 return HashMap()
             }
@@ -102,7 +119,7 @@ class EnfermeriaActivity : AppCompatActivity() {
                     val status = jsonResponse.getString("status")
                     if (status == "success") {
                         Toast.makeText(this, "Justificante $nuevoEstatus con éxito", Toast.LENGTH_SHORT).show()
-                        // Recargamos la pantalla de inmediato para ver al siguiente alumno
+                        // Recargamos la pantalla para ver si hay otro alumno en espera
                         cargarJustificantePendiente()
                     }
                 } catch (e: Exception) {
@@ -121,5 +138,12 @@ class EnfermeriaActivity : AppCompatActivity() {
             }
         }
         queue.add(stringRequest)
+    }
+
+    private fun mostrarPantallaVacia() {
+        idJustificanteActual = -1
+        tvSinSolicitudesEnfermera.text = "No hay solicitudes de justificantes pendientes por revisar."
+        tvSinSolicitudesEnfermera.visibility = View.VISIBLE
+        layoutTarjetaRevision.visibility = View.GONE
     }
 }
