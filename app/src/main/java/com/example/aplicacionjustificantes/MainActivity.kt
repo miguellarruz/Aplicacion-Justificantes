@@ -3,6 +3,7 @@ package com.example.aplicacionjustificantes
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
+import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,14 +21,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnEnviar: Button
     private lateinit var txtArchivo: TextView
     private lateinit var imagePreview: ImageView
-    private lateinit var txtInstruccionFoto: TextView // 📌 Nueva vista para la instrucción
+    private lateinit var txtInstruccionFoto: TextView
 
     private var archivoUri: Uri? = null
 
     private var idUsuarioLogueado: Int = 1
     private var motivoRecibido: String = ""
     private var fechaRecibida: String = ""
-    private var tipoJustificanteRecibido: String = "" // 📌 Para saber si es médico o personal
+    private var tipoJustificanteRecibido: String = ""
+
+    // 📌 NUEVAS VARIABLES: Para que dejen de llegar en (NULL) a HeidiSQL
+    private var institucionRecibida: String = "No especificado"
+    private var cedulaRecibida: String = "No especificado"
 
     private val seleccionarArchivoLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -52,27 +58,26 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // RECUPERAMOS LOS DATOS COMPLETOS
+        // 📌 CORREGIDO: Ahora sí recuperamos los datos que viajan desde Interfaz2A
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
         motivoRecibido = intent.getStringExtra("EXTRA_MOTIVO") ?: "Sin motivo"
         fechaRecibida = intent.getStringExtra("EXTRA_FECHA") ?: "2026-01-01"
-        tipoJustificanteRecibido = intent.getStringExtra("EXTRA_TIPO") ?: "" // 📌 Atrapamos el tipo
+        tipoJustificanteRecibido = intent.getStringExtra("EXTRA_TIPO") ?: ""
+
+        // Atrapamos las dos variables institucionales
+        institucionRecibida = intent.getStringExtra("EXTRA_INSTITUCION") ?: "No especificado"
+        cedulaRecibida = intent.getStringExtra("EXTRA_CEDULA") ?: "No especificado"
 
         btnSeleccionar = findViewById(R.id.btnSeleccionar)
         btnEnviar = findViewById(R.id.btnEnviar)
         txtArchivo = findViewById(R.id.txtArchivo)
         imagePreview = findViewById(R.id.imagePreview)
 
-        // 📌 Opcional: Si tienes un TextView arriba del botón para dar instrucciones, vincúlalo aquí.
-        // Si no tienes uno, el programa modificará directamente el botón de seleccionar archivo para dar la orden.
-
-        // 📌 CAMBIO DINÁMICO: Evaluamos qué tipo de asunto es para cambiar la instrucción de la foto
+        // Evaluación dinámica de interfaz según el tipo de asunto
         if (tipoJustificanteRecibido.contains("Personal", ignoreCase = true)) {
-            // Es asunto personal/familiar
             btnSeleccionar.text = "Subir INE del Padre/Tutor"
             txtArchivo.text = "⚠️ Para asuntos personales es obligatorio adjuntar la credencial INE de tu tutor."
         } else {
-            // Es asunto médico
             btnSeleccionar.text = "Subir Receta Médica"
             txtArchivo.text = "Por favor, adjunta la foto de tu receta o constancia médica médica."
         }
@@ -85,7 +90,6 @@ class MainActivity : AppCompatActivity() {
             if (archivoUri != null) {
                 guardarJustificanteEnBaseDatos()
             } else {
-                // 📌 Mensaje de error personalizado según el caso
                 val mensajeError = if (tipoJustificanteRecibido.contains("Personal", ignoreCase = true)) {
                     "Por favor, selecciona la foto de la credencial INE de tu tutor"
                 } else {
@@ -96,9 +100,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 📌 NUEVA FUNCIÓN: Abre el archivo local de la imagen y lo transforma a Base64 real
+    private fun convertirUriABase64(uri: Uri?): String {
+        if (uri == null) return ""
+        return try {
+            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            val bytes = inputStream?.readBytes()
+            inputStream?.close()
+            if (bytes != null) {
+                Base64.encodeToString(bytes, Base64.DEFAULT)
+            } else ""
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
+    }
+
     private fun guardarJustificanteEnBaseDatos() {
         val url = "http://192.168.1.83/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
+
+        // Convertimos la imagen de la receta a la cadena de texto larga
+        val fotoBase64 = convertirUriABase64(archivoUri)
+
+        if (fotoBase64.isEmpty()) {
+            Toast.makeText(this, "Error al procesar la imagen elegida", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         val stringRequest = object : StringRequest(
             Method.POST,
@@ -110,10 +138,10 @@ class MainActivity : AppCompatActivity() {
                     val message = jsonResponse.getString("message")
 
                     if (status == "success") {
-                        Toast.makeText(this@MainActivity, "Éxito: $message", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@MainActivity, "¡Éxito!: $message", Toast.LENGTH_LONG).show()
                         finish()
                     } else {
-                        Toast.makeText(this@MainActivity, "Error del servidor: $message", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@MainActivity, "Error del servidor: $message", Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "Respuesta: $response", Toast.LENGTH_LONG).show()
@@ -123,12 +151,15 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, "Error de red al conectar con guardar_justificante.php", Toast.LENGTH_LONG).show()
             }
         ) {
+            // 📌 CORREGIDO: Enviamos todos los parámetros correspondientes al PHP sin nulos
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
                 params["id_usuario"] = idUsuarioLogueado.toString()
                 params["motivo"] = motivoRecibido
                 params["fecha_inasistencia"] = fechaRecibida
-                params["ruta_foto"] = archivoUri.toString()
+                params["institucion"] = institucionRecibida   // <--- Agregado
+                params["cedula_medica"] = cedulaRecibida       // <--- Agregado
+                params["ruta_foto"] = fotoBase64               // <--- Enviamos la foto decodificada
                 return params
             }
         }
