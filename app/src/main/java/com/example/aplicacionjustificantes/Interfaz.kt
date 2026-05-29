@@ -35,7 +35,7 @@ class Interfaz : AppCompatActivity() {
         contenedorLista = findViewById(R.id.contenedorLista)
         txtListaVacia = findViewById(R.id.txtListaVacia)
 
-        // Abre el formulario de llenado (Interfaz2A ya corregida)
+        // Abre el formulario de llenado
         btnNuevaSolicitud.setOnClickListener {
             val intent = Intent(this, Interfaz2A::class.java)
             intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
@@ -73,7 +73,8 @@ class Interfaz : AppCompatActivity() {
         // Limpiamos la lista anterior para que no se dupliquen las tarjetas visuales
         contenedorLista.removeAllViews()
 
-        val url = "http://10.0.2.2/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
+        // ✅ IP CORREGIDA PARA CELULAR FÍSICO
+        val url = "http://192.168.1.83/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,
