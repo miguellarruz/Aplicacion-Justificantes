@@ -1,9 +1,12 @@
 package com.example.aplicacionjustificantes
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -19,6 +22,8 @@ class EnfermeriaActivity : AppCompatActivity() {
     private lateinit var layoutTarjetaRevision: LinearLayout
     private lateinit var tvNombreAlumnoRevision: TextView
     private lateinit var tvDetalleJustificante: TextView
+    private lateinit var tvDatosExtraRevision: TextView
+    private lateinit var ivEvidenciaEnfermera: ImageView
 
     private var idJustificanteActual: Int = -1
 
@@ -26,17 +31,18 @@ class EnfermeriaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.enfermeria_panel)
 
-        // Vincular todos los componentes del XML
+        // Vincular componentes del XML nuevos y antiguos
         tvSinSolicitudesEnfermera = findViewById(R.id.tvSinSolicitudesEnfermera)
         layoutTarjetaRevision = findViewById(R.id.layoutTarjetaRevision)
         tvNombreAlumnoRevision = findViewById(R.id.tvNombreAlumnoRevision)
         tvDetalleJustificante = findViewById(R.id.tvDetalleJustificante)
+        tvDatosExtraRevision = findViewById(R.id.tvDatosExtraRevision)
+        ivEvidenciaEnfermera = findViewById(R.id.ivEvidenciaEnfermera)
 
         val btnAprobar = findViewById<Button>(R.id.btnAprobarEnfermera)
         val btnRechazar = findViewById<Button>(R.id.btnRechazarEnfermera)
         val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesionEnfermera)
 
-        // 📌 Buscamos el justificante pendiente en HeidiSQL al iniciar
         cargarJustificantePendiente()
 
         btnAprobar.setOnClickListener {
@@ -76,28 +82,44 @@ class EnfermeriaActivity : AppCompatActivity() {
                         idJustificanteActual = jsonResponse.getInt("id_justificante")
                         val alumno = jsonResponse.getString("nombre_alumno")
                         val motivo = jsonResponse.getString("motivo")
+                        val fechaInasistencia = jsonResponse.getString("fecha_inasistencia")
+                        val institucion = jsonResponse.getString("institucion")
+                        val cedula = jsonResponse.getString("cedula_medica")
+                        val fotoBase64 = jsonResponse.getString("foto_base64")
 
-                        // 1. Inyectamos los datos reales en los TextViews del XML
+                        // 1. Mostrar textos estructurados
                         tvNombreAlumnoRevision.text = "Alumno: $alumno"
-                        tvDetalleJustificante.text = "Motivo: $motivo"
+                        tvDetalleJustificante.text = "Motivo: $motivo\nFecha Inasistencia: $fechaInasistencia"
+                        tvDatosExtraRevision.text = "Institución médica/Lugar: $institucion\nCédula Profesional: $cedula"
 
-                        // 2. 📌 MÁGIA: Escondemos el mensaje de "No hay" y mostramos la tarjeta blanca con los botones
+                        // 2. 📌 DECODIFICAR FOTO BASE64 A IMAGEN EN VIVO
+                        if (fotoBase64.isNotEmpty()) {
+                            try {
+                                val decodedString = Base64.decode(fotoBase64, Base64.DEFAULT)
+                                val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+                                ivEvidenciaEnfermera.setImageBitmap(decodedByte)
+                            } catch (e: Exception) {
+                                ivEvidenciaEnfermera.setImageResource(android.R.drawable.ic_menu_gallery) // Icono default si falla
+                            }
+                        } else {
+                            ivEvidenciaEnfermera.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                        }
+
+                        // 3. Ajustar visibilidades
                         tvSinSolicitudesEnfermera.visibility = View.GONE
                         layoutTarjetaRevision.visibility = View.VISIBLE
 
                     } else {
-                        // Si el servidor responde que está vacío, regresamos al estado inicial
                         mostrarPantallaVacia()
                     }
                 } catch (e: Exception) {
-                    // Si ocurre un error de lectura, mostramos el mensaje de error crudo en el texto
                     idJustificanteActual = -1
-                    tvSinSolicitudesEnfermera.text = "Error al procesar los datos del servidor."
+                    tvSinSolicitudesEnfermera.text = "Error al procesar los datos."
                     tvSinSolicitudesEnfermera.visibility = View.VISIBLE
                     layoutTarjetaRevision.visibility = View.GONE
                 }
             },
-            { error ->
+            {
                 Toast.makeText(this, "Error de red al conectar con Enfermería", Toast.LENGTH_SHORT).show()
             }
         ) {
@@ -119,11 +141,10 @@ class EnfermeriaActivity : AppCompatActivity() {
                     val status = jsonResponse.getString("status")
                     if (status == "success") {
                         Toast.makeText(this, "Justificante $nuevoEstatus con éxito", Toast.LENGTH_SHORT).show()
-                        // Recargamos la pantalla para ver si hay otro alumno en espera
                         cargarJustificantePendiente()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Error de respuesta al actualizar", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error al procesar respuesta", Toast.LENGTH_SHORT).show()
                 }
             },
             {

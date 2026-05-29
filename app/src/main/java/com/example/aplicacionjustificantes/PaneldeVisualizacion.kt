@@ -7,6 +7,10 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import org.json.JSONObject
 
 class PaneldeVisualizacion : AppCompatActivity() {
 
@@ -51,14 +55,50 @@ class PaneldeVisualizacion : AppCompatActivity() {
                 finish()
             }
 
-            // Mostramos los valores iniciales en los contadores
-            mostrarDatosEnPanel(0, 0, 0)
+            // 📌 MODIFICADO: Ahora en lugar de poner ceros fijos, va a consultar a la base de datos en tiempo real
+            consultarContadoresServidor()
 
         } catch (e: Exception) {
-            // Si hay un error al inflar la vista, la app no morirá; te dirá qué pasó
             Toast.makeText(this, "Error al cargar la interfaz: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
+    }
+
+    // 📌 NUEVA FUNCIÓN: Se conecta con tu PHP mandando el ID del alumno logueado por método POST
+    private fun consultarContadoresServidor() {
+        val url = "http://192.168.1.83/justificantes_api/obtener_estado_justificante.php"
+        val queue = Volley.newRequestQueue(this)
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                try {
+                    val jsonResponse = JSONObject(response)
+                    val status = jsonResponse.getString("status")
+
+                    if (status == "success") {
+                        val pendientes = jsonResponse.getInt("pendientes")
+                        val aprobados = jsonResponse.getInt("aprobados")
+                        val rechazados = jsonResponse.getInt("rechazados")
+
+                        // Inyectamos los números que calculó el PHP en HeidiSQL
+                        mostrarDatosEnPanel(pendientes, aprobados, rechazados)
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Error al leer contadores", Toast.LENGTH_SHORT).show()
+                }
+            },
+            { error ->
+                Toast.makeText(this, "Error de red al cargar el panel de estados", Toast.LENGTH_SHORT).show()
+            }
+        ) {
+            // Mandamos el ID del usuario actual para que el PHP sepa de quién contar las solicitudes
+            override fun getParams(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["id_usuario"] = idUsuarioLogueado.toString()
+                return params
+            }
+        }
+        queue.add(stringRequest)
     }
 
     private fun mostrarDatosEnPanel(pendientes: Int, aprobados: Int, rechazados: Int) {
