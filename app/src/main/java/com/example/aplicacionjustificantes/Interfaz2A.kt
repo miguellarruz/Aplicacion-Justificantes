@@ -17,15 +17,6 @@ import androidx.core.view.WindowInsetsCompat
 
 class Interfaz2A : AppCompatActivity() {
 
-    private lateinit var spinnerTipo: Spinner
-    private lateinit var layoutCamposMedicos: LinearLayout
-    private lateinit var etMotivo: EditText
-    private lateinit var etInstitucion: EditText
-    private lateinit var etCedula: EditText
-    private lateinit var etFecha: EditText
-    private lateinit var etDetalles: EditText
-    private lateinit var btnSiguiente: Button
-
     // 📌 ID del usuario que viaja a través de la aplicación
     private var idUsuarioLogueado: Int = 1
 
@@ -37,20 +28,22 @@ class Interfaz2A : AppCompatActivity() {
         // 📌 Recuperamos el ID real asignado en el Login
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        // Inicialización explícita de vistas usando el nuevo diseño estilizado
+        val spinnerTipo = findViewById<Spinner>(R.id.spinnerTipo)
+        val layoutCamposMedicos = findViewById<LinearLayout>(R.id.layoutCamposMedicos)
+        val etMotivo = findViewById<EditText>(R.id.etMotivo)
+        val etInstitucion = findViewById<EditText>(R.id.etInstitucion)
+        val etCedula = findViewById<EditText>(R.id.etCedula)
+        val etFecha = findViewById<EditText>(R.id.etFecha)
+        val etDetalles = findViewById<EditText>(R.id.etDetalles)
+        val btnSiguiente = findViewById<Button>(R.id.btnSiguiente)
+
+        // Ajuste dinámico de barras de estado directamente sobre el contenedor del spinner de forma segura
+        ViewCompat.setOnApplyWindowInsetsListener(spinnerTipo) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        spinnerTipo = findViewById(R.id.spinnerTipo)
-        layoutCamposMedicos = findViewById(R.id.layoutCamposMedicos)
-        etMotivo = findViewById(R.id.etMotivo)
-        etInstitucion = findViewById(R.id.etInstitucion)
-        etCedula = findViewById(R.id.etCedula)
-        etFecha = findViewById(R.id.etFecha)
-        etDetalles = findViewById(R.id.etDetalles)
-        btnSiguiente = findViewById(R.id.btnSiguiente)
 
         // Configurar las opciones del Spinner
         val opciones = arrayOf("Asunto Médico (Requiere receta)", "Asunto Personal / Familiar")
@@ -61,10 +54,8 @@ class Interfaz2A : AppCompatActivity() {
         spinnerTipo.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (position == 0) {
-                    // Seleccionó Médico -> Mostrar campos
                     layoutCamposMedicos.visibility = View.VISIBLE
                 } else {
-                    // Seleccionó Personal -> Ocultar campos médicos por completo
                     layoutCamposMedicos.visibility = View.GONE
                 }
             }
@@ -73,6 +64,7 @@ class Interfaz2A : AppCompatActivity() {
 
         btnSiguiente.setOnClickListener {
             val tipoJustificante = spinnerTipo.selectedItem.toString()
+            val posicionSpinner = spinnerTipo.selectedItemPosition
             val motivoText = etMotivo.text.toString().trim()
             val fechaText = etFecha.text.toString().trim()
             val detallesText = etDetalles.text.toString().trim()
@@ -80,14 +72,12 @@ class Interfaz2A : AppCompatActivity() {
             var institucionText = "N/A"
             var cedulaText = "N/A"
 
-            // Validaciones básicas de los campos principales
             if (motivoText.isEmpty() || fechaText.isEmpty() || detallesText.isEmpty()) {
                 Toast.makeText(this, "Por favor completa los campos requeridos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Validación estricta si se seleccionó Asunto Médico
-            if (spinnerTipo.selectedItemPosition == 0) {
+            if (posicionSpinner == 0) {
                 institucionText = etInstitucion.text.toString().trim()
                 cedulaText = etCedula.text.toString().trim()
 
@@ -97,10 +87,11 @@ class Interfaz2A : AppCompatActivity() {
                 }
             }
 
-            // Empaquetamos todo y lo mandamos a la pantalla de la fotografía
+            // Enviamos el paquete completo de datos hacia el MainActivity (que maneja la foto)
             val intent = Intent(this, MainActivity::class.java).apply {
                 putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
-                putExtra("EXTRA_TIPO", tipoJustificante) // El MainActivity leerá esto para exigir el INE o la Receta
+                putExtra("EXTRA_TIPO", tipoJustificante)
+                putExtra("EXTRA_TIPO_POS", posicionSpinner)
                 putExtra("EXTRA_MOTIVO", motivoText)
                 putExtra("EXTRA_INSTITUCION", institucionText)
                 putExtra("EXTRA_CEDULA", cedulaText)
@@ -108,7 +99,6 @@ class Interfaz2A : AppCompatActivity() {
                 putExtra("EXTRA_DETALLES", detallesText)
             }
             startActivity(intent)
-            finish() // Limpiamos la pila de pantallas para optimizar la app
         }
     }
 }
