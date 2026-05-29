@@ -69,7 +69,7 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun cargarJustificantePendiente() {
-        val url = "http://192.168.1.83/justificantes_api/obtener_estado_justificante.php"
+        val url = "http://192.168.56.1/justificantes_api/obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,
@@ -131,7 +131,7 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun actualizarEstatusEnServidor(nuevoEstatus: String) {
-        val url = "http://192.168.1.83/justificantes_api/actualizar_justificante.php"
+        val url = "http://192.168.56.1/justificantes_api/actualizar_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,

@@ -74,7 +74,7 @@ class Interfaz : AppCompatActivity() {
         contenedorLista.removeAllViews()
 
         // ✅ IP CORREGIDA PARA CELULAR FÍSICO
-        val url = "http://192.168.1.83/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
+        val url = "http://192.168.56.1/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,

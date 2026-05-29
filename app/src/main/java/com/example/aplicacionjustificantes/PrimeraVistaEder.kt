@@ -21,7 +21,7 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var txtRegistrarse: TextView
 
     // ✅ CONFIGURADO: Apunta exactamente al archivo login.php dentro de tu servidor XAMPP local
-    private val URL_LOGIN = "http://192.168.1.83/justificantes_api/login.php"
+    private val URL_LOGIN = "http://192.168.56.1/justificantes_api/login.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

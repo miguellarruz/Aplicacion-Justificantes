@@ -66,7 +66,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
 
     // 📌 NUEVA FUNCIÓN: Se conecta con tu PHP mandando el ID del alumno logueado por método POST
     private fun consultarContadoresServidor() {
-        val url = "http://192.168.1.83/justificantes_api/obtener_estado_justificante.php"
+        val url = "http://192.168.56.1/justificantes_api/obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,

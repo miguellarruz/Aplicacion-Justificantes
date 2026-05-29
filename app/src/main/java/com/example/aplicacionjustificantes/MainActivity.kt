@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun guardarJustificanteEnBaseDatos() {
-        val url = "http://192.168.1.83/justificantes_api/guardar_justificante.php"
+        val url = "http://192.168.56.1/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
         val fotoBase64 = convertirUriABase64(archivoUri)
 

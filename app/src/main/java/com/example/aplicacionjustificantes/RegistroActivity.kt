@@ -20,7 +20,7 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var btnRegistrar: Button
     private lateinit var txtVolverLogin: TextView
 
-    private val URL_REGISTRO = "http://192.168.1.83/justificantes_api/registrar_usuario.php"
+    private val URL_REGISTRO = "http://192.168.56.1/justificantes_api/registrar_usuario.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

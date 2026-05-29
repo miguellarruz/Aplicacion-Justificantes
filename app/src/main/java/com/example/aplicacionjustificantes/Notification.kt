@@ -36,7 +36,7 @@ class Notification : AppCompatActivity() {
         contenedorNotificaciones.removeAllViews()
 
         //  Usando tu IP local corregida 192.168.1.83
-        val url = "http://192.168.1.83/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
+        val url = "http://192.168.56.1/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,
