@@ -6,34 +6,35 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import org.json.JSONObject
 
 class Interfaz : AppCompatActivity() {
 
     private lateinit var contenedorLista: LinearLayout
     private lateinit var txtListaVacia: TextView
 
-    // Variable para guardar el ID del alumno real que inició sesión
     private var idUsuarioLogueado: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.interfaz)
 
-        // 🆔 RECUPERAMOS EL ID REAL QUE VIENE DEL LOGIN
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
         val btnNuevaSolicitud = findViewById<Button>(R.id.btnNuevaSolicitud)
         val btnNotificaciones = findViewById<Button>(R.id.btnIrNotificaciones)
         val btnVisualizacion = findViewById<Button>(R.id.btnIrVisualizacion)
+        val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesion)
 
         contenedorLista = findViewById(R.id.contenedorLista)
         txtListaVacia = findViewById(R.id.txtListaVacia)
 
-        actualizarVisibilidadHistorial()
-
         btnNuevaSolicitud.setOnClickListener {
-            // ✅ CORREGIDO: Ahora le pasamos el ID del usuario a Interfaz2A para evitar el crasheo
             val intent = Intent(this, Interfaz2A::class.java)
             intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
             startActivity(intent)
@@ -50,6 +51,62 @@ class Interfaz : AppCompatActivity() {
             intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
             startActivity(intent)
         }
+
+        // 📌 Configuración del Cierre de Sesión corregido
+        btnCerrarSesion.setOnClickListener {
+            // ✅ Nombre exacto de tu Login: PrimeraVistaEder
+            val intent = Intent(this, PrimeraVistaEder::class.java)
+
+            // Limpia el historial de pantallas por seguridad
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            startActivity(intent)
+            finish() // Cierra por completo el menú principal
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        cargarJustificantesDesdeBaseDatos()
+    }
+
+    private fun cargarJustificantesDesdeBaseDatos() {
+        contenedorLista.removeAllViews()
+
+        val url = "http://10.0.2.2/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
+
+        val queue = Volley.newRequestQueue(this)
+        val stringRequest = StringRequest(Request.Method.GET, url,
+            { response ->
+                try {
+                    val jsonResponse = JSONObject(response)
+                    val status = jsonResponse.getString("status")
+
+                    if (status == "success") {
+                        val jsonArray = jsonResponse.getJSONArray("datos")
+
+                        for (i in 0 until jsonArray.length()) {
+                            val objeto = jsonArray.getJSONObject(i)
+                            val estatus = objeto.getString("estatus")
+                            val motivo = objeto.getString("motivo")
+
+                            agregarJustificanteALaLista("Estatus: $estatus", motivo)
+                        }
+                    } else {
+                        actualizarVisibilidadHistorial()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    actualizarVisibilidadHistorial()
+                }
+            },
+            { error ->
+                Toast.makeText(this, "Error de conexión con el servidor principal", Toast.LENGTH_SHORT).show()
+                actualizarVisibilidadHistorial()
+            }
+        )
+
+        queue.add(stringRequest)
     }
 
     private fun agregarJustificanteALaLista(titulo: String, motivo: String) {
@@ -60,6 +117,13 @@ class Interfaz : AppCompatActivity() {
 
         txtTitulo.text = titulo
         txtMotivo.text = "Motivo: $motivo"
+
+        // 📌 NUEVO: Si el alumno toca la tarjeta individual del justificante creado, lo lleva a ver sus detalles
+        vistaJustificante.setOnClickListener {
+            val intent = Intent(this, PaneldeVisualizacion::class.java)
+            intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
+            startActivity(intent)
+        }
 
         contenedorLista.addView(vistaJustificante)
         actualizarVisibilidadHistorial()
