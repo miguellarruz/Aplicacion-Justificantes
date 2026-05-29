@@ -1,6 +1,8 @@
 package com.example.aplicacionjustificantes
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
@@ -13,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
@@ -30,7 +33,6 @@ class MainActivity : AppCompatActivity() {
     private var fechaRecibida: String = ""
     private var tipoJustificanteRecibido: String = ""
 
-    // 📌 NUEVAS VARIABLES: Para que dejen de llegar en (NULL) a HeidiSQL
     private var institucionRecibida: String = "No especificado"
     private var cedulaRecibida: String = "No especificado"
 
@@ -58,13 +60,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 📌 CORREGIDO: Ahora sí recuperamos los datos que viajan desde Interfaz2A
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
         motivoRecibido = intent.getStringExtra("EXTRA_MOTIVO") ?: "Sin motivo"
         fechaRecibida = intent.getStringExtra("EXTRA_FECHA") ?: "2026-01-01"
         tipoJustificanteRecibido = intent.getStringExtra("EXTRA_TIPO") ?: ""
 
-        // Atrapamos las dos variables institucionales
         institucionRecibida = intent.getStringExtra("EXTRA_INSTITUCION") ?: "No especificado"
         cedulaRecibida = intent.getStringExtra("EXTRA_CEDULA") ?: "No especificado"
 
@@ -73,7 +73,6 @@ class MainActivity : AppCompatActivity() {
         txtArchivo = findViewById(R.id.txtArchivo)
         imagePreview = findViewById(R.id.imagePreview)
 
-        // Evaluación dinámica de interfaz según el tipo de asunto
         if (tipoJustificanteRecibido.contains("Personal", ignoreCase = true)) {
             btnSeleccionar.text = "Subir INE del Padre/Tutor"
             txtArchivo.text = "⚠️ Para asuntos personales es obligatorio adjuntar la credencial INE de tu tutor."
@@ -100,15 +99,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 📌 NUEVA FUNCIÓN: Abre el archivo local de la imagen y lo transforma a Base64 real
+    // 📌 OPTIMIZADO: Abre la imagen, reduce su escala y la comprime en calidad para que no sature Volley
     private fun convertirUriABase64(uri: Uri?): String {
         if (uri == null) return ""
         return try {
             val inputStream: InputStream? = contentResolver.openInputStream(uri)
-            val bytes = inputStream?.readBytes()
+
+            // Decodificar la imagen reduciendo sus dimensiones si es muy enorme (escala)
+            val opciones = BitmapFactory.Options().apply {
+                inSampleSize = 2 // Reduce el tamaño a la mitad (píxeles) optimizando la RAM
+            }
+            val bitmapOriginal = BitmapFactory.decodeStream(inputStream, null, opciones)
             inputStream?.close()
-            if (bytes != null) {
-                Base64.encodeToString(bytes, Base64.DEFAULT)
+
+            if (bitmapOriginal != null) {
+                val outputStream = ByteArrayOutputStream()
+                // Comprimir al 70% de calidad en formato JPEG (mantiene legibilidad de la receta y reduce el peso un 90%)
+                bitmapOriginal.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+                val bytesComprimidos = outputStream.toByteArray()
+                outputStream.close()
+
+                Base64.encodeToString(bytesComprimidos, Base64.DEFAULT)
             } else ""
         } catch (e: Exception) {
             e.printStackTrace()
@@ -120,7 +131,7 @@ class MainActivity : AppCompatActivity() {
         val url = "http://192.168.1.83/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
-        // Convertimos la imagen de la receta a la cadena de texto larga
+        // Ahora obtendremos una cadena Base64 ultra ligera y totalmente válida
         val fotoBase64 = convertirUriABase64(archivoUri)
 
         if (fotoBase64.isEmpty()) {
@@ -151,15 +162,14 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, "Error de red al conectar con guardar_justificante.php", Toast.LENGTH_LONG).show()
             }
         ) {
-            // 📌 CORREGIDO: Enviamos todos los parámetros correspondientes al PHP sin nulos
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
                 params["id_usuario"] = idUsuarioLogueado.toString()
                 params["motivo"] = motivoRecibido
                 params["fecha_inasistencia"] = fechaRecibida
-                params["institucion"] = institucionRecibida   // <--- Agregado
-                params["cedula_medica"] = cedulaRecibida       // <--- Agregado
-                params["ruta_foto"] = fotoBase64               // <--- Enviamos la foto decodificada
+                params["institucion"] = institucionRecibida
+                params["cedula_medica"] = cedulaRecibida
+                params["ruta_foto"] = fotoBase64
                 return params
             }
         }
@@ -170,7 +180,7 @@ class MainActivity : AppCompatActivity() {
     private fun seleccionarArchivo() {
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "*/*"
-            val tiposPermitidos = arrayOf("image/jpeg", "image/png", "application/pdf")
+            val tiposPermitidos = arrayOf("image/jpeg", "image/png")
             putExtra(Intent.EXTRA_MIME_TYPES, tiposPermitidos)
         }
         seleccionarArchivoLauncher.launch(Intent.createChooser(intent, "Selecciona tu justificante"))

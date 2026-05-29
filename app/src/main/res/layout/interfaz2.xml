@@ -1,186 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F5F7FA"
-    tools:context=".Interfaz2A">
+    android:background="#F5F7FA">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/main"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:orientation="vertical"
+        android:paddingLeft="32dp"
+        android:paddingRight="32dp"
+        android:paddingTop="40dp"
+        android:paddingBottom="40dp"
+        android:gravity="center_horizontal">
 
         <TextView
-            android:id="@+id/lblTitulo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Datos del Justificante"
+            android:text="Subir Foto del Justificante"
+            android:textSize="24sp"
+            android:textStyle="bold"
             android:textColor="#1A202C"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textAlign="center"
+            android:layout_marginBottom="36dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E2E8F0">
+
+            <ImageView
+                android:id="@+id/imagePreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@mipmap/ic_launcher"
+                android:scaleType="centerCrop" />
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
-            android:id="@+id/lblTipoMotivo"
+            android:id="@+id/txtArchivo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tipo de justificante:"
-            android:textColor="#1A237E"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:layout_marginTop="28dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/lblTitulo" />
-
-        <Spinner
-            android:id="@+id/spinnerTipo"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:layout_marginTop="10dp"
-            android:background="@android:drawable/btn_dropdown"
-            android:spinnerMode="dropdown"
-            android:padding="8dp"
-            app:layout_constraintTop_toBottomOf="@id/lblTipoMotivo" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilMotivo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Asunto breve"
-            android:layout_marginTop="24dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:hintTextColor="#1A237E"
-            app:boxStrokeColor="#1A237E"
-            app:layout_constraintTop_toBottomOf="@id/spinnerTipo">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etMotivo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Ej. Trámite de pasaporte, Gripe severa"
-                android:inputType="text"
-                android:textColor="#000000"
-                android:textColorHint="#718096" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-
-        <LinearLayout
-            android:id="@+id/layoutCamposMedicos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/tilMotivo">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Institución o Clínica de atención"
-                android:layout_marginTop="12dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintTextColor="#1A237E"
-                app:boxStrokeColor="#1A237E">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etInstitucion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Ej. IMSS UMF 7, Cruz Roja"
-                    android:inputType="text"
-                    android:textColor="#000000"
-                    android:textColorHint="#718096" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Número de Cédula del Médico"
-                android:layout_marginTop="20dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintTextColor="#1A237E"
-                app:boxStrokeColor="#1A237E">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCedula"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Ej. 12345678"
-                    android:inputType="number"
-                    android:textColor="#000000"
-                    android:textColorHint="#718096" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilFecha"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Fecha de la falta"
-            android:layout_marginTop="24dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:hintTextColor="#1A237E"
-            app:boxStrokeColor="#1A237E"
-            app:layout_constraintTop_toBottomOf="@id/layoutCamposMedicos">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etFecha"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="AAAA-MM-DD"
-                android:inputType="date"
-                android:textColor="#000000"
-                android:textColorHint="#718096" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilDetalles"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Explicación detallada de la falta"
-            android:layout_marginTop="24dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:hintTextColor="#1A237E"
-            app:boxStrokeColor="#1A237E"
-            app:layout_constraintTop_toBottomOf="@id/tilFecha">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etDetalles"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:hint="Describe la situación para que control escolar pueda validarlo de forma justa."
-                android:gravity="top|start"
-                android:inputType="textMultiLine"
-                android:overScrollMode="always"
-                android:scrollbarStyle="insideOverlay"
-                android:scrollbars="vertical"
-                android:textColor="#000000"
-                android:textColorHint="#718096" />
-        </com.google.android.material.textfield.TextInputLayout>
-
+            android:text="Ningún archivo seleccionado"
+            android:textColor="#718096"
+            android:textSize="14sp"
+            android:layout_marginBottom="40dp"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSiguiente"
+            android:id="@+id/btnSeleccionar"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="16dp"
-            android:text="SIGUIENTE: ADJUNTAR FOTO"
+            android:layout_height="54dp"
+            android:text="Seleccionar Foto"
+            android:textColor="#1A237E"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="#1A237E"
+            app:strokeWidth="2dp"
+            app:cornerRadius="12dp"
+            android:layout_marginBottom="16dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEnviar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="ENVIAR JUSTIFICANTE"
             android:textSize="16sp"
             android:textStyle="bold"
             android:backgroundTint="#1A237E"
             android:textColor="#FFFFFF"
-            app:cornerRadius="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilDetalles"
-            app:layout_constraintVertical_bias="0.0" />
+            app:elevation="3dp"
+            app:cornerRadius="12dp"
+            android:layout_marginTop="12dp"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </ScrollView>
