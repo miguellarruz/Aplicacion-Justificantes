@@ -55,7 +55,8 @@ class EnfermeriaActivity : AppCompatActivity() {
         val url = "http://192.168.1.83/justificantes_api/obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
-        val stringRequest = StringRequest(Request.Method.GET, url,
+        // 📌 MODIFICADO: Cambiado a StringRequest de tipo POST para acoplarse al PHP unificado
+        val stringRequest = object : StringRequest(Method.POST, url,
             { response ->
                 try {
                     val jsonResponse = JSONObject(response)
@@ -66,19 +67,27 @@ class EnfermeriaActivity : AppCompatActivity() {
                         val alumno = jsonResponse.getString("nombre_alumno")
                         val motivo = jsonResponse.getString("motivo")
 
+                        // 📌 Coloca de forma dinámica el nombre del alumno y motivo real de la BD
                         tvStatus.text = "Revisando a: $alumno\nMotivo: $motivo"
                     } else {
                         idJustificanteActual = -1
-                        tvStatus.text = "No hay justificantes pendientes por revisar"
+                        val msg = jsonResponse.optString("message", "No hay justificantes pendientes por revisar")
+                        tvStatus.text = msg
                     }
                 } catch (e: Exception) {
-                    tvStatus.text = "No hay justificantes pendientes"
+                    // 📌 DIAGNÓSTICO: Si el PHP responde algo raro, aquí verás el texto crudo en lugar de una pantalla en blanco
+                    tvStatus.text = "Error de respuesta. Respuesta cruda:\n$response"
                 }
             },
-            {
+            { error ->
                 Toast.makeText(this, "Error de red al conectar con Enfermería", Toast.LENGTH_SHORT).show()
             }
-        )
+        ) {
+            // Mandamos los parámetros vacíos porque para Enfermería queremos todos los registros pendientes de forma general
+            override fun getParams(): MutableMap<String, String> {
+                return HashMap()
+            }
+        }
         queue.add(stringRequest)
     }
 
@@ -93,11 +102,11 @@ class EnfermeriaActivity : AppCompatActivity() {
                     val status = jsonResponse.getString("status")
                     if (status == "success") {
                         Toast.makeText(this, "Justificante $nuevoEstatus con éxito", Toast.LENGTH_SHORT).show()
-                        // Recargamos la pantalla para ver si hay otro alumno en la fila
+                        // Recargamos la pantalla de inmediato para ver al siguiente alumno
                         cargarJustificantePendiente()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Error de respuesta", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error de respuesta al actualizar", Toast.LENGTH_SHORT).show()
                 }
             },
             {
