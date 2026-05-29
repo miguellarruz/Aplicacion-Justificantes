@@ -1,10 +1,7 @@
 package com.example.aplicacionjustificantes
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -16,92 +13,97 @@ import org.json.JSONObject
 
 class Notification : AppCompatActivity() {
 
-    private lateinit var btnRegresarDesdeNotis: Button
-    private lateinit var tvTituloNotificaciones: TextView
-    private lateinit var tvSinNotificaciones: TextView
-
-    // Contenedores de estado
-    private lateinit var layoutEnProceso: LinearLayout
-    private lateinit var layoutAprobado: LinearLayout
-    private lateinit var layoutRechazado: LinearLayout
+    private lateinit var contenedorNotificaciones: LinearLayout
+    private lateinit var txtNotisVacias: TextView
+    private var idUsuarioLogueado: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Asegúrate de que tu XML de notificaciones se llame "notis" o cámbialo por el nombre correcto
         setContentView(R.layout.notis)
 
-        btnRegresarDesdeNotis = findViewById(R.id.btnRegresarDesdeNotis)
-        tvTituloNotificaciones = findViewById(R.id.tvTituloNotificaciones)
-        tvSinNotificaciones = findViewById(R.id.tvSinNotificaciones)
+        // Recuperamos el ID del alumno logueado
+        idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
-        layoutEnProceso = findViewById(R.id.layoutEnProceso)
-        layoutAprobado = findViewById(R.id.layoutAprobado)
-        layoutRechazado = findViewById(R.id.layoutRechazado)
+        // Enlazamos componentes de tu XML
+        contenedorNotificaciones = findViewById(R.id.contenedorLista) // El LinearLayout vertical dentro del ScrollView
+        txtNotisVacias = findViewById(R.id.txtListaVacia) // El TextView que dice que no hay elementos
 
-        val sharedPreferences = getSharedPreferences("SesionUsuario", Context.MODE_PRIVATE)
-        val nombreUsuario = sharedPreferences.getString("nombre_cuenta", "Usuario")
-        // IMPORTANTE: Asegúrate de guardar el ID del usuario en SharedPreferences al iniciar sesión
-        val idUsuario = sharedPreferences.getInt("id_usuario", 1)
-
-        tvTituloNotificaciones.text = "Notificaciones de $nombreUsuario"
-
-        // Llamamos al servidor para ver el estado real
-        consultarEstadoJustificante(idUsuario)
-
-        btnRegresarDesdeNotis.setOnClickListener {
-            val intent = Intent(this, Interfaz::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
+        cargarNotificaciones()
     }
 
-    private fun consultarEstadoJustificante(idUsuario: Int) {
-        // ⚠️ Asegúrate de usar tu IP correcta
-        val url = "http://192.168.1.83/justificantes_api/consultar_estado.php?id_usuario=$idUsuario"
+    private fun cargarNotificaciones() {
+        contenedorNotificaciones.removeAllViews()
+
+        //  Usando tu IP local corregida 192.168.1.83
+        val url = "http://192.168.1.83/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
-
-        val stringRequest = StringRequest(
-            Request.Method.GET, url,
+        val stringRequest = StringRequest(Request.Method.GET, url,
             { response ->
                 try {
                     val jsonResponse = JSONObject(response)
                     val status = jsonResponse.getString("status")
 
                     if (status == "success") {
-                        val estado = jsonResponse.getString("estado")
-                        mostrarTarjetaCorrespondiente(estado)
+                        val jsonArray = jsonResponse.getJSONArray("datos")
+
+                        for (i in 0 until jsonArray.length()) {
+                            val objeto = jsonArray.getJSONObject(i)
+                            val estatus = objeto.getString("estatus")
+                            val motivo = objeto.getString("motivo")
+
+                            // Inflamos una tarjeta para la notificación
+                            agregarNotificacionALaLista(estatus, motivo)
+                        }
                     } else {
-                        // Si no hay justificantes, dejamos el mensaje de "Sin notificaciones"
-                        tvSinNotificaciones.visibility = View.VISIBLE
+                        actualizarVisibilidadNotis()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Error leyendo los datos", Toast.LENGTH_SHORT).show()
+                    e.printStackTrace()
+                    actualizarVisibilidadNotis()
                 }
             },
-            {
-                Toast.makeText(this, "Error de red", Toast.LENGTH_SHORT).show()
+            { error ->
+                Toast.makeText(this, "Error al conectar con las notificaciones", Toast.LENGTH_SHORT).show()
+                actualizarVisibilidadNotis()
             }
         )
 
         queue.add(stringRequest)
     }
 
-    private fun mostrarTarjetaCorrespondiente(estado: String) {
-        // 1. Ocultamos el texto de "No hay notificaciones"
-        tvSinNotificaciones.visibility = View.GONE
+    private fun agregarNotificacionALaLista(estatus: String, motivo: String) {
+        // Reutilizamos tu diseño de item_justificante para mostrar el resultado
+        val vistaNoti = layoutInflater.inflate(R.layout.item_justificante, null)
 
-        // 2. Apagamos todas las tarjetas primero por seguridad
-        layoutEnProceso.visibility = View.GONE
-        layoutAprobado.visibility = View.GONE
-        layoutRechazado.visibility = View.GONE
+        val txtTitulo = vistaNoti.findViewById<TextView>(R.id.txtTituloJustificante)
+        val txtMotivo = vistaNoti.findViewById<TextView>(R.id.txtMotivoJustificante)
 
-        // 3. Encendemos solo la tarjeta que mandó la doctora en la Base de Datos
-        when (estado.lowercase()) {
-            "aprobado" -> layoutAprobado.visibility = View.VISIBLE
-            "rechazado" -> layoutRechazado.visibility = View.VISIBLE
-            "en proceso", "pendiente" -> layoutEnProceso.visibility = View.VISIBLE
-            else -> tvSinNotificaciones.visibility = View.VISIBLE // Por si tiene un estado raro
+        // Personalizamos el diseño según la respuesta del administrador
+        if (estatus.equals("Aceptado", ignoreCase = true)) {
+            txtTitulo.text = "SOLICITUD APROBADA"
+            txtTitulo.setTextColor(android.graphics.Color.parseColor("#2E7D32")) // Verde
+        } else {
+            txtTitulo.text = "SOLICITUD RECHAZADA"
+            txtTitulo.setTextColor(android.graphics.Color.parseColor("#C62828")) // Rojo
+        }
+
+        txtMotivo.text = "Tu justificante por \"$motivo\" ha sido cambiado a estatus: $estatus."
+
+        contenedorNotificaciones.addView(vistaNoti)
+        actualizarVisibilidadNotis()
+    }
+
+    private fun actualizarVisibilidadNotis() {
+        if (contenedorNotificaciones.childCount == 0) {
+            txtNotisVacias.visibility = View.VISIBLE
+            // Si tienes un mensaje personalizado de "No tienes notificaciones", puedes cambiar el texto aquí:
+            txtNotisVacias.text = "🔔 No tienes nuevas notificaciones de tus justificantes."
+            contenedorNotificaciones.visibility = View.GONE
+        } else {
+            txtNotisVacias.visibility = View.GONE
+            contenedorNotificaciones.visibility = View.VISIBLE
         }
     }
 }

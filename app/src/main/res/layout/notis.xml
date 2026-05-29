@@ -1,129 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#F8F9FA">
+    android:background="#F5F7FA"
+    android:padding="20dp">
 
     <TextView
-        android:id="@+id/tvTituloNotificaciones"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sistema de notificaciones para cambios de estado en justificantes"
-        android:textColor="#212529"
-        android:textSize="16sp"
+        android:text="Notificaciones"
+        android:textSize="26sp"
         android:textStyle="bold"
+        android:textColor="#1A237E"
         android:gravity="center"
-        android:layout_marginBottom="24dp" />
-
-    <LinearLayout
-        android:id="@+id/layoutEnProceso"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#CCE5FF"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="12dp"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Justificante En Proceso"
-            android:textColor="#004085"
-            android:textStyle="bold"
-            android:textSize="15sp"/>
-
-        <TextView
-            android:id="@+id/tvTextoProceso"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Tu documento ha sido recibido y actualmente se encuentra en revisión por el departamento escolar."
-            android:textColor="#004085"
-            android:textSize="13sp"
-            android:layout_marginTop="4dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layoutAprobado"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#D4EDDA"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="12dp"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Justificante Aprobado"
-            android:textColor="#155724"
-            android:textStyle="bold"
-            android:textSize="15sp"/>
-
-        <TextView
-            android:id="@+id/tvTextoAprobado"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Tu solicitud de justificante ha sido revisada y aprobada de manera exitosa por el administrador."
-            android:textColor="#155724"
-            android:textSize="13sp"
-            android:layout_marginTop="4dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layoutRechazado"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#F8D7DA"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="32dp"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Justificante Rechazado"
-            android:textColor="#721C24"
-            android:textStyle="bold"
-            android:textSize="15sp"/>
-
-        <TextView
-            android:id="@+id/tvTextoRechazado"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Tu solicitud de justificante fue rechazada. Por favor, verifica que los datos o la imagen enviada sean legibles."
-            android:textColor="#721C24"
-            android:textSize="13sp"
-            android:layout_marginTop="4dp"/>
-    </LinearLayout>
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"/>
 
     <TextView
-        android:id="@+id/tvSinNotificaciones"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No tienes notificaciones o cambios de estado pendientes en este momento."
-        android:textColor="#6c757d"
+        android:text="CeCyTe Plantel 5 Queretaro"
         android:textSize="14sp"
+        android:textColor="#5C6BC0"
         android:gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginBottom="25dp"/>
+
+    <TextView
+        android:id="@+id/txtListaVacia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🔔 Buscando nuevas actualizaciones..."
+        android:textColor="#718096"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginTop="30dp"
         android:visibility="visible" />
 
-    <View
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:layout_marginTop="15dp">
 
-    <Button
-        android:id="@+id/btnRegresarDesdeNotis"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Regresar a Interfaz"
-        android:background="#6c757d"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold" />
+        <LinearLayout
+            android:id="@+id/contenedorLista"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 
 </LinearLayout>
