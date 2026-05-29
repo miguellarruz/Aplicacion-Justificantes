@@ -26,10 +26,16 @@ class Interfaz2A : AppCompatActivity() {
     private lateinit var etDetalles: EditText
     private lateinit var btnSiguiente: Button
 
+    // 📌 Variable agregada para no perder el rastro del usuario
+    private var idUsuarioLogueado: Int = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.interfaz2)
+
+        // 📌 RECUPERAMOS EL ID REAL QUE VIENE DESDE "Interfaz"
+        idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -92,6 +98,9 @@ class Interfaz2A : AppCompatActivity() {
 
             // Si pasa las validaciones, mandamos todo al MainActivity
             val intent = Intent(this, MainActivity::class.java).apply {
+                // 📌 METEMOS EL ID DEL USUARIO AL INTENT PARA QUE LLEGUE AL MAINACTIVITY
+                putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
+
                 putExtra("EXTRA_TIPO", tipoJustificante)
                 putExtra("EXTRA_MOTIVO", motivoText)
                 putExtra("EXTRA_INSTITUCION", institucionText)
@@ -100,6 +109,7 @@ class Interfaz2A : AppCompatActivity() {
                 putExtra("EXTRA_DETALLES", detallesText)
             }
             startActivity(intent)
+            finish() // Cierra el formulario para mantener limpia la pila de pantallas
         }
     }
 }
