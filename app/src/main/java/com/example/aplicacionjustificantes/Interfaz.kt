@@ -24,6 +24,7 @@ class Interfaz : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.interfaz)
 
+        // Recuperamos el ID real que viene desde el inicio de sesión
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
         val btnNuevaSolicitud = findViewById<Button>(R.id.btnNuevaSolicitud)
@@ -34,6 +35,7 @@ class Interfaz : AppCompatActivity() {
         contenedorLista = findViewById(R.id.contenedorLista)
         txtListaVacia = findViewById(R.id.txtListaVacia)
 
+        // Abre el formulario de llenado (Interfaz2A ya corregida)
         btnNuevaSolicitud.setOnClickListener {
             val intent = Intent(this, Interfaz2A::class.java)
             intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
@@ -52,25 +54,23 @@ class Interfaz : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // 📌 Configuración del Cierre de Sesión corregido
+        // Cierre de sesión seguro redirigiendo a tu Login exacto
         btnCerrarSesion.setOnClickListener {
-            // ✅ Nombre exacto de tu Login: PrimeraVistaEder
             val intent = Intent(this, PrimeraVistaEder::class.java)
-
-            // Limpia el historial de pantallas por seguridad
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
             startActivity(intent)
-            finish() // Cierra por completo el menú principal
+            finish()
         }
     }
 
+    // Cada que el usuario regresa a esta pantalla, refresca la lista automáticamente
     override fun onResume() {
         super.onResume()
         cargarJustificantesDesdeBaseDatos()
     }
 
     private fun cargarJustificantesDesdeBaseDatos() {
+        // Limpiamos la lista anterior para que no se dupliquen las tarjetas visuales
         contenedorLista.removeAllViews()
 
         val url = "http://10.0.2.2/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
@@ -118,7 +118,7 @@ class Interfaz : AppCompatActivity() {
         txtTitulo.text = titulo
         txtMotivo.text = "Motivo: $motivo"
 
-        // 📌 NUEVO: Si el alumno toca la tarjeta individual del justificante creado, lo lleva a ver sus detalles
+        // Te manda al panel de supervisión detallada si presionas la tarjeta
         vistaJustificante.setOnClickListener {
             val intent = Intent(this, PaneldeVisualizacion::class.java)
             intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
