@@ -35,23 +35,24 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
 
-        <com.google.android.material.card.MaterialCardView
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            app:cardCornerRadius="10dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:cardElevation="2dp"
-            app:strokeWidth="1.5dp"
-            app:strokeColor="#4A5568">
+            app:hintEnabled="false"
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeColor="#4A5568"
+            app:boxBackgroundColor="#FFFFFF"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
             <Spinner
                 android:id="@+id/spinnerTipo"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="54dp"
                 android:paddingLeft="12dp"
-                android:paddingRight="12dp"/>
-        </com.google.android.material.card.MaterialCardView>
+                android:paddingRight="12dp"
+                android:spinnerMode="dropdown" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
