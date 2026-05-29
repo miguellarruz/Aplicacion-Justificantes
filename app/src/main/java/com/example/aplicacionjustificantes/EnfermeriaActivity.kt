@@ -25,21 +25,22 @@ class EnfermeriaActivity : AppCompatActivity() {
         val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesionEnfermera)
         tvStatus = findViewById(R.id.tvNombreAlumnoRevision)
 
-        // 📌 Al abrir la pantalla, jalamos de inmediato el justificante desde XAMPP
+        // 📌 Al abrir la pantalla, busca el justificante pendiente en HeidiSQL
         cargarJustificantePendiente()
 
         btnAprobar.setOnClickListener {
             if (idJustificanteActual != -1) {
-                tvStatus.text = "Justificante: ✅ APROBADO"
-                Toast.makeText(this, "Estado actualizado a Aprobado", Toast.LENGTH_SHORT).show()
-                // Nota: Aquí podrás implementar el cambio de estatus en BD más adelante
+                actualizarEstatusEnServidor("Aprobado")
+            } else {
+                Toast.makeText(this, "No hay ningún justificante seleccionado", Toast.LENGTH_SHORT).show()
             }
         }
 
         btnRechazar.setOnClickListener {
             if (idJustificanteActual != -1) {
-                tvStatus.text = "Justificante: ❌ RECHAZADO"
-                Toast.makeText(this, "Estado actualizado a Rechazado", Toast.LENGTH_SHORT).show()
+                actualizarEstatusEnServidor("Rechazado")
+            } else {
+                Toast.makeText(this, "No hay ningún justificante seleccionado", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -65,19 +66,51 @@ class EnfermeriaActivity : AppCompatActivity() {
                         val alumno = jsonResponse.getString("nombre_alumno")
                         val motivo = jsonResponse.getString("motivo")
 
-                        // Ponemos el nombre del alumno real que obtuvimos de HeidiSQL
                         tvStatus.text = "Revisando a: $alumno\nMotivo: $motivo"
                     } else {
-                        tvStatus.text = "No hay justificantes pendientes"
+                        idJustificanteActual = -1
+                        tvStatus.text = "No hay justificantes pendientes por revisar"
                     }
                 } catch (e: Exception) {
-                    tvStatus.text = "Error al procesar datos"
+                    tvStatus.text = "No hay justificantes pendientes"
                 }
             },
             {
-                Toast.makeText(this, "Error de conexión con el servidor", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Error de red al conectar con Enfermería", Toast.LENGTH_SHORT).show()
             }
         )
+        queue.add(stringRequest)
+    }
+
+    private fun actualizarEstatusEnServidor(nuevoEstatus: String) {
+        val url = "http://192.168.1.83/justificantes_api/actualizar_justificante.php"
+        val queue = Volley.newRequestQueue(this)
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                try {
+                    val jsonResponse = JSONObject(response)
+                    val status = jsonResponse.getString("status")
+                    if (status == "success") {
+                        Toast.makeText(this, "Justificante $nuevoEstatus con éxito", Toast.LENGTH_SHORT).show()
+                        // Recargamos la pantalla para ver si hay otro alumno en la fila
+                        cargarJustificantePendiente()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Error de respuesta", Toast.LENGTH_SHORT).show()
+                }
+            },
+            {
+                Toast.makeText(this, "Error al conectar con la base de datos", Toast.LENGTH_SHORT).show()
+            }
+        ) {
+            override fun getParams(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["id_justificante"] = idJustificanteActual.toString()
+                params["estatus"] = nuevoEstatus
+                return params
+            }
+        }
         queue.add(stringRequest)
     }
 }
