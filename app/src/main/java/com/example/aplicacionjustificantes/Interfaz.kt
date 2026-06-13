@@ -23,13 +23,11 @@ class Interfaz : AppCompatActivity() {
 
     private var idUsuarioLogueado: Int = 1
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.interfaz)
 
-        // 📌 CORREGIDO: Ajuste del diseño Edge-to-Edge sobre la raíz '@id/main'
         val vistaRaiz = findViewById<LinearLayout>(R.id.main)
         if (vistaRaiz != null) {
             ViewCompat.setOnApplyWindowInsetsListener(vistaRaiz) { v, insets ->
@@ -39,7 +37,6 @@ class Interfaz : AppCompatActivity() {
             }
         }
 
-        // Recuperamos el ID real que viene desde el inicio de sesión
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
         val btnNuevaSolicitud = findViewById<Button>(R.id.btnNuevaSolicitud)
@@ -50,7 +47,6 @@ class Interfaz : AppCompatActivity() {
         contenedorLista = findViewById(R.id.contenedorLista)
         txtListaVacia = findViewById(R.id.txtListaVacia)
 
-        // Abre el formulario de llenado
         btnNuevaSolicitud.setOnClickListener {
             val intent = Intent(this, Interfaz2A::class.java)
             intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
@@ -69,7 +65,6 @@ class Interfaz : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Cierre de sesión seguro
         btnCerrarSesion.setOnClickListener {
             val intent = Intent(this, PrimeraVistaEder::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -86,18 +81,20 @@ class Interfaz : AppCompatActivity() {
     private fun cargarJustificantesDesdeBaseDatos() {
         contenedorLista.removeAllViews()
 
-        // 🔥 CORREGIDO: Usando el objeto global Config
         val url = "${Config.IP_SERVIDOR}/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
-        val stringRequest = StringRequest(Request.Method.GET, url,
+
+        // Convertimos a un objeto StringRequest explícito para poder sobreescribir sus métodos
+        val stringRequest = object : StringRequest(Request.Method.GET, url,
             { response ->
                 try {
                     val jsonResponse = JSONObject(response)
                     val status = jsonResponse.getString("status")
 
                     if (status == "success") {
-                        val jsonArray = jsonResponse.getJSONArray("datos")
+                        // 📌 CORREGIDO: Tu PHP retorna la clave "data", no "datos"
+                        val jsonArray = jsonResponse.getJSONArray("data")
 
                         for (i in 0 until jsonArray.length()) {
                             val objeto = jsonArray.getJSONObject(i)
@@ -118,7 +115,14 @@ class Interfaz : AppCompatActivity() {
                 Toast.makeText(this, "Error de conexión con el servidor principal", Toast.LENGTH_SHORT).show()
                 actualizarVisibilidadHistorial()
             }
-        )
+        ) {
+            // 🔥 AGREGADO: Cabecera indispensable para saltarse el filtro de ngrok
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["ngrok-skip-browser-warning"] = "true"
+                return headers
+            }
+        }
 
         queue.add(stringRequest)
     }
