@@ -27,7 +27,7 @@ class EnfermeriaActivity : AppCompatActivity() {
 
     private var idJustificanteActual: Int = -1
 
-    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    // 🌐 TU ENLACE SEGURO DE NGROK ACTUALIZADO
     private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,11 +73,11 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun cargarJustificantePendiente() {
-        // Usa la variable dinámica con la nueva IP
-        val url = "http://$IP_SERVIDOR/justificantes_api/obtener_estado_justificante.php"
+        // ✅ CORREGIDO: Se quitó "http://" y se cambió a método GET para que el PHP entre directo al Bloque B (Enfermería)
+        val url = "$IP_SERVIDOR/justificantes_api/obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
-        val stringRequest = object : StringRequest(Method.POST, url,
+        val stringRequest = StringRequest(Request.Method.GET, url,
             { response ->
                 try {
                     val jsonResponse = JSONObject(response)
@@ -127,17 +127,13 @@ class EnfermeriaActivity : AppCompatActivity() {
             {
                 Toast.makeText(this, "Error de red al conectar con Enfermería", Toast.LENGTH_SHORT).show()
             }
-        ) {
-            override fun getParams(): MutableMap<String, String> {
-                return HashMap()
-            }
-        }
+        )
         queue.add(stringRequest)
     }
 
     private fun actualizarEstatusEnServidor(nuevoEstatus: String) {
-        // Usa la variable dinámica con la nueva IP
-        val url = "http://$IP_SERVIDOR/justificantes_api/actualizar_justificante.php"
+        // ✅ CORREGIDO: Se quitó el "http://" inicial para evitar el choque de protocolos
+        val url = "$IP_SERVIDOR/justificantes_api/actualizar_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,

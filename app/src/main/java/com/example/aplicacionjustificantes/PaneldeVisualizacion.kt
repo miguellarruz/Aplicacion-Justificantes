@@ -22,17 +22,19 @@ class PaneldeVisualizacion : AppCompatActivity() {
 
     private var idUsuarioLogueado: Int = 1
 
+    // 🌐 TU ENLACE SEGURO DE NGROK ACTUALIZADO (Sustituye la IP local que fallaba)
+    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         try {
-            // 📌 Vinculamos con tu diseño XML que se llama "panel.xml"
             setContentView(R.layout.panel)
 
             // Capturamos el ID del usuario enviado desde Interfaz
             idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
-            // Vincular componentes con los IDs exactos de tu XML
+            // Vincular componentes del XML
             tvTituloPanel = findViewById(R.id.tvTituloPanel)
             tvContadorPendiente = findViewById(R.id.tvContadorPendiente)
             tvContadorAprobado = findViewById(R.id.tvContadorAprobado)
@@ -55,7 +57,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
                 finish()
             }
 
-            // 📌 MODIFICADO: Ahora en lugar de poner ceros fijos, va a consultar a la base de datos en tiempo real
+            // Consultar a la base de datos en tiempo real mediante el túnel seguro
             consultarContadoresServidor()
 
         } catch (e: Exception) {
@@ -64,12 +66,12 @@ class PaneldeVisualizacion : AppCompatActivity() {
         }
     }
 
-    // 📌 NUEVA FUNCIÓN: Se conecta con tu PHP mandando el ID del alumno logueado por método POST
     private fun consultarContadoresServidor() {
-        val url = "http://192.168.56.1/justificantes_api/obtener_estado_justificante.php"
+        // ✅ CORREGIDO: Apunta a tu ngrok activo y envía el ID de forma limpia en la URL (GET)
+        val url = "$IP_SERVIDOR/justificantes_api/obtener_estado_justificante.php?id_usuario=$idUsuarioLogueado"
         val queue = Volley.newRequestQueue(this)
 
-        val stringRequest = object : StringRequest(Method.POST, url,
+        val stringRequest = StringRequest(Request.Method.GET, url,
             { response ->
                 try {
                     val jsonResponse = JSONObject(response)
@@ -80,7 +82,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
                         val aprobados = jsonResponse.getInt("aprobados")
                         val rechazados = jsonResponse.getInt("rechazados")
 
-                        // Inyectamos los números que calculó el PHP en HeidiSQL
+                        // Inyectamos los números calculados por la base de datos
                         mostrarDatosEnPanel(pendientes, aprobados, rechazados)
                     }
                 } catch (e: Exception) {
@@ -90,14 +92,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
             { error ->
                 Toast.makeText(this, "Error de red al cargar el panel de estados", Toast.LENGTH_SHORT).show()
             }
-        ) {
-            // Mandamos el ID del usuario actual para que el PHP sepa de quién contar las solicitudes
-            override fun getParams(): MutableMap<String, String> {
-                val params = HashMap<String, String>()
-                params["id_usuario"] = idUsuarioLogueado.toString()
-                return params
-            }
-        }
+        )
         queue.add(stringRequest)
     }
 

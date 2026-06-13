@@ -17,20 +17,19 @@ class Notification : AppCompatActivity() {
     private lateinit var txtNotisVacias: TextView
     private var idUsuarioLogueado: Int = 1
 
-    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    // 🌐 TU ENLACE SEGURO DE NGROK ACTUALIZADO
     private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Asegúrate de que tu XML de notificaciones se llame "notis" o cámbialo por el nombre correcto
         setContentView(R.layout.notis)
 
         // Recuperamos el ID del alumno logueado
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
-        // Enlazamos componentes de tu XML
-        contenedorNotificaciones = findViewById(R.id.contenedorLista) // El LinearLayout vertical dentro del ScrollView
-        txtNotisVacias = findViewById(R.id.txtListaVacia) // El TextView que dice que no hay elementos
+        // Enlazamos componentes del XML
+        contenedorNotificaciones = findViewById(R.id.contenedorLista)
+        txtNotisVacias = findViewById(R.id.txtListaVacia)
 
         cargarNotificaciones()
     }
@@ -38,8 +37,8 @@ class Notification : AppCompatActivity() {
     private fun cargarNotificaciones() {
         contenedorNotificaciones.removeAllViews()
 
-        // 🔥 CORREGIDO: Ahora usa la variable dinámica con tu IP real activa de la red
-        val url = "http://$IP_SERVIDOR/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
+        // ✅ CORREGIDO: Se quitó el "http://" sobrante para evitar el choque http://https://
+        val url = "$IP_SERVIDOR/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,
@@ -77,13 +76,12 @@ class Notification : AppCompatActivity() {
     }
 
     private fun agregarNotificacionALaLista(estatus: String, motivo: String) {
-        // Reutilizamos tu diseño de item_justificante para mostrar el resultado
         val vistaNoti = layoutInflater.inflate(R.layout.item_justificante, null)
 
         val txtTitulo = vistaNoti.findViewById<TextView>(R.id.txtTituloJustificante)
         val txtMotivo = vistaNoti.findViewById<TextView>(R.id.txtMotivoJustificante)
 
-        // Personalizamos el diseño según la respuesta del administrador
+        // Personalizamos el diseño según la respuesta de Enfermería
         if (estatus.equals("Aceptado", ignoreCase = true) || estatus.equals("Aprobado", ignoreCase = true)) {
             txtTitulo.text = "SOLICITUD APROBADA"
             txtTitulo.setTextColor(android.graphics.Color.parseColor("#2E7D32")) // Verde
@@ -101,7 +99,6 @@ class Notification : AppCompatActivity() {
     private fun actualizarVisibilidadNotis() {
         if (contenedorNotificaciones.childCount == 0) {
             txtNotisVacias.visibility = View.VISIBLE
-            // Si tienes un mensaje personalizado de "No tienes notificaciones", puedes cambiar el texto aquí:
             txtNotisVacias.text = "🔔 No tienes nuevas notificaciones de tus justificantes."
             contenedorNotificaciones.visibility = View.GONE
         } else {
