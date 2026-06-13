@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
     private var institucionRecibida: String = "No especificado"
     private var cedulaRecibida: String = "No especificado"
 
-
     private val seleccionarArchivoLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -58,6 +57,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Recuperar datos de la pantalla anterior (Si no llega nada, por defecto asigna el 1)
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
         motivoRecibido = intent.getStringExtra("EXTRA_MOTIVO") ?: "Sin motivo"
         fechaRecibida = intent.getStringExtra("EXTRA_FECHA") ?: "2026-01-01"
@@ -115,7 +115,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun guardarJustificanteEnBaseDatos() {
-        // 🔥 CORREGIDO: Usando el objeto global Config
         val url = "${Config.IP_SERVIDOR}/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
         val fotoBase64 = convertirUriABase64(archivoUri)
@@ -138,14 +137,14 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity, "¡Éxito!: $message", Toast.LENGTH_LONG).show()
                         finish()
                     } else {
-                        Toast.makeText(this@MainActivity, "Error: $message", Toast.LENGTH_SHORT).show()
+                        // Si da error de Llave Foránea, este Toast te dirá exactamente qué ID falló
+                        Toast.makeText(this@MainActivity, "Error en Servidor: $message", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "Respuesta del servidor: $response", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MainActivity, "Respuesta inesperada: $response", Toast.LENGTH_LONG).show()
                 }
             },
             Response.ErrorListener { error ->
-                // Agregamos el detalle del error para saber exactamente qué pasa si falla
                 Toast.makeText(this@MainActivity, "Error de red al conectar: ${error.message}", Toast.LENGTH_LONG).show()
             }
         ) {
@@ -162,6 +161,8 @@ class MainActivity : AppCompatActivity() {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
+                // 🚀 Cabecera indispensable para saltar el bloqueo automático de ngrok
+                headers["ngrok-skip-browser-warning"] = "true"
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
                 return headers
             }
