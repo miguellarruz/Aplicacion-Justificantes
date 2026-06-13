@@ -21,11 +21,11 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var btnRegistrar: Button
     private lateinit var txtVolverLogin: TextView
 
-    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    // 🌐 TU ENLACE SEGURO DE NGROK ACTUALIZADO
     private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
-    // ✅ CONFIGURADO: Apunta dinámicamente a tu servidor local actual
-    private val URL_REGISTRO = "http://$IP_SERVIDOR/justificantes_api/registrar_usuario.php"
+    // ✅ CORREGIDO: Se quitó el "http://" inicial para que no choque con el https de ngrok
+    private val URL_REGISTRO = "$IP_SERVIDOR/justificantes_api/registrar_usuario.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +48,9 @@ class RegistroActivity : AppCompatActivity() {
                 Toast.makeText(this, getString(R.string.llena_campos), Toast.LENGTH_SHORT).show()
             } else if (password.length < 4) {
                 Toast.makeText(this, "La contraseña debe tener al menos 4 caracteres", Toast.LENGTH_SHORT).show()
-            } else if (!correo.endsWith("@cecyteq.edu.mx")) {
-                Toast.makeText(this, "Debes usar tu correo institucional @cecyteq.edu.mx", Toast.LENGTH_LONG).show()
+            } else if (!correo.endsWith("@cecyteq.edu.mx") && !correo.endsWith("@cecyte.edu.mx")) {
+                // ✅ AJUSTADO: Ahora acepta tanto cecyteq (alumnos) como cecyte (enfermería) para evitar bloqueos
+                Toast.makeText(this, "Debes usar tu correo institucional válido", Toast.LENGTH_LONG).show()
             } else {
                 ejecutarRegistro(nombre, matricula, correo, password)
             }
@@ -79,13 +80,11 @@ class RegistroActivity : AppCompatActivity() {
                         Toast.makeText(this@RegistroActivity, message, Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    // Si el servidor responde algo no válido, se mostrará la cadena completa para ver el error real
                     Toast.makeText(this@RegistroActivity, "Respuesta del servidor: $response", Toast.LENGTH_LONG).show()
                 }
             },
             { error ->
-                // 🔥 CORREGIDO: Mensaje interactivo que muestra con qué IP falló la conexión
-                Toast.makeText(this@RegistroActivity, "Error de red en Registro: No se pudo conectar a registrar_usuario.php (IP: $IP_SERVIDOR)", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@RegistroActivity, "Error de red en Registro: No se pudo conectar a registrar_usuario.php", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
