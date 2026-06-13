@@ -27,7 +27,6 @@ class EnfermeriaActivity : AppCompatActivity() {
 
     private var idJustificanteActual: Int = -1
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.enfermeria_panel)
@@ -73,7 +72,6 @@ class EnfermeriaActivity : AppCompatActivity() {
         val url = "${Config.IP_SERVIDOR}/justificantes_api/obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
-        // ✅ NUEVO: Convertido a objeto para poder usar la función getHeaders() en método GET
         val stringRequest = object : StringRequest(Request.Method.GET, url,
             { response ->
                 try {
@@ -90,12 +88,10 @@ class EnfermeriaActivity : AppCompatActivity() {
 
                         val fotoBase64 = jsonResponse.optString("foto_base64", "")
 
-                        // 1. Mostrar textos estructurados
                         tvNombreAlumnoRevision.text = "Alumno: $alumno"
                         tvDetalleJustificante.text = "Motivo: $motivo\nFecha Inasistencia: $fechaInasistencia"
                         tvDatosExtraRevision.text = "Institución médica/Lugar: $institucion\nCédula Profesional: $cedula"
 
-                        // 2. DECODIFICAR FOTO BASE64 CON FILTRO DE SEGURIDAD
                         if (fotoBase64.isNotEmpty() && fotoBase64.length > 50) {
                             try {
                                 val decodedString = Base64.decode(fotoBase64, Base64.DEFAULT)
@@ -112,7 +108,6 @@ class EnfermeriaActivity : AppCompatActivity() {
                             ivEvidenciaEnfermera.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
                         }
 
-                        // 3. Ajustar visibilidades
                         tvSinSolicitudesEnfermera.visibility = View.GONE
                         layoutTarjetaRevision.visibility = View.VISIBLE
 
@@ -127,7 +122,6 @@ class EnfermeriaActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error de red al conectar con Enfermería", Toast.LENGTH_SHORT).show()
             }
         ) {
-            // 🔥 NUEVO: Se añade el bypass para ngrok en la carga de datos del panel
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 headers["ngrok-skip-browser-warning"] = "true"
@@ -146,16 +140,21 @@ class EnfermeriaActivity : AppCompatActivity() {
                 try {
                     val jsonResponse = JSONObject(response)
                     val status = jsonResponse.getString("status")
+                    val message = jsonResponse.optString("message", "")
+
                     if (status == "success") {
-                        Toast.makeText(this, "Justificante $nuevoEstatus con éxito", Toast.LENGTH_SHORT).show()
-                        cargarJustificantePendiente()
+                        Toast.makeText(this, "¡Éxito!: Justificante $nuevoEstatus", Toast.LENGTH_SHORT).show()
+                        cargarJustificantePendiente() // Recarga la lista para traer el siguiente pendiente
+                    } else {
+                        Toast.makeText(this, "Error del Servidor: $message", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Error al procesar respuesta", Toast.LENGTH_SHORT).show()
+                    // Si el JSON falla, imprimimos la respuesta cruda para auditoría visual directa
+                    Toast.makeText(this, "Respuesta inesperada: $response", Toast.LENGTH_LONG).show()
                 }
             },
-            {
-                Toast.makeText(this, "Error al conectar con la base de datos", Toast.LENGTH_SHORT).show()
+            { error ->
+                Toast.makeText(this, "Fallo de red: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
@@ -165,10 +164,11 @@ class EnfermeriaActivity : AppCompatActivity() {
                 return params
             }
 
-            // 🔥 NUEVO: Bypass para la acción de los botones de aprobar/rechazar
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 headers["ngrok-skip-browser-warning"] = "true"
+                // 📌 CORREGIDO: Informa al servidor el formato correcto de las variables POST
+                headers["Content-Type"] = "application/x-www-form-urlencoded"
                 return headers
             }
         }
