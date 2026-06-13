@@ -22,7 +22,7 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var txtVolverLogin: TextView
 
     // 🌐 TU NUEVA IP DE RED ACTUALIZADA
-    private val IP_SERVIDOR = "192.168.43.196"
+    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     // ✅ CONFIGURADO: Apunta dinámicamente a tu servidor local actual
     private val URL_REGISTRO = "http://$IP_SERVIDOR/justificantes_api/registrar_usuario.php"
