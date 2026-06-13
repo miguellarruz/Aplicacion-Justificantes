@@ -27,14 +27,11 @@ class EnfermeriaActivity : AppCompatActivity() {
 
     private var idJustificanteActual: Int = -1
 
-    // 🌐 TU ENLACE SEGURO DE NGROK ACTUALIZADO
-    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.enfermeria_panel)
 
-        // Vincular componentes del XML nuevos y antiguos
         tvSinSolicitudesEnfermera = findViewById(R.id.tvSinSolicitudesEnfermera)
         layoutTarjetaRevision = findViewById(R.id.layoutTarjetaRevision)
         tvNombreAlumnoRevision = findViewById(R.id.tvNombreAlumnoRevision)
@@ -73,11 +70,11 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun cargarJustificantePendiente() {
-        // ✅ CORREGIDO: Se quitó "http://" y se cambió a método GET para que el PHP entre directo al Bloque B (Enfermería)
-        val url = "$IP_SERVIDOR/justificantes_api/obtener_estado_justificante.php"
+        val url = "${Config.IP_SERVIDOR}/justificantes_api/obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
-        val stringRequest = StringRequest(Request.Method.GET, url,
+        // ✅ NUEVO: Convertido a objeto para poder usar la función getHeaders() en método GET
+        val stringRequest = object : StringRequest(Request.Method.GET, url,
             { response ->
                 try {
                     val jsonResponse = JSONObject(response)
@@ -90,19 +87,24 @@ class EnfermeriaActivity : AppCompatActivity() {
                         val fechaInasistencia = jsonResponse.getString("fecha_inasistencia")
                         val institucion = jsonResponse.getString("institucion")
                         val cedula = jsonResponse.getString("cedula_medica")
-                        val fotoBase64 = jsonResponse.getString("foto_base64")
+
+                        val fotoBase64 = jsonResponse.optString("foto_base64", "")
 
                         // 1. Mostrar textos estructurados
                         tvNombreAlumnoRevision.text = "Alumno: $alumno"
                         tvDetalleJustificante.text = "Motivo: $motivo\nFecha Inasistencia: $fechaInasistencia"
                         tvDatosExtraRevision.text = "Institución médica/Lugar: $institucion\nCédula Profesional: $cedula"
 
-                        // 2. DECODIFICAR FOTO BASE64 A IMAGEN EN VIVO
-                        if (fotoBase64.isNotEmpty()) {
+                        // 2. DECODIFICAR FOTO BASE64 CON FILTRO DE SEGURIDAD
+                        if (fotoBase64.isNotEmpty() && fotoBase64.length > 50) {
                             try {
                                 val decodedString = Base64.decode(fotoBase64, Base64.DEFAULT)
                                 val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-                                ivEvidenciaEnfermera.setImageBitmap(decodedByte)
+                                if (decodedByte != null) {
+                                    ivEvidenciaEnfermera.setImageBitmap(decodedByte)
+                                } else {
+                                    ivEvidenciaEnfermera.setImageResource(android.R.drawable.ic_menu_gallery)
+                                }
                             } catch (e: Exception) {
                                 ivEvidenciaEnfermera.setImageResource(android.R.drawable.ic_menu_gallery)
                             }
@@ -118,22 +120,25 @@ class EnfermeriaActivity : AppCompatActivity() {
                         mostrarPantallaVacia()
                     }
                 } catch (e: Exception) {
-                    idJustificanteActual = -1
-                    tvSinSolicitudesEnfermera.text = "Error al procesar los datos."
-                    tvSinSolicitudesEnfermera.visibility = View.VISIBLE
-                    layoutTarjetaRevision.visibility = View.GONE
+                    mostrarPantallaVacia()
                 }
             },
             {
                 Toast.makeText(this, "Error de red al conectar con Enfermería", Toast.LENGTH_SHORT).show()
             }
-        )
+        ) {
+            // 🔥 NUEVO: Se añade el bypass para ngrok en la carga de datos del panel
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["ngrok-skip-browser-warning"] = "true"
+                return headers
+            }
+        }
         queue.add(stringRequest)
     }
 
     private fun actualizarEstatusEnServidor(nuevoEstatus: String) {
-        // ✅ CORREGIDO: Se quitó el "http://" inicial para evitar el choque de protocolos
-        val url = "$IP_SERVIDOR/justificantes_api/actualizar_justificante.php"
+        val url = "${Config.IP_SERVIDOR}/justificantes_api/actualizar_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,
@@ -158,6 +163,13 @@ class EnfermeriaActivity : AppCompatActivity() {
                 params["id_justificante"] = idJustificanteActual.toString()
                 params["estatus"] = nuevoEstatus
                 return params
+            }
+
+            // 🔥 NUEVO: Bypass para la acción de los botones de aprobar/rechazar
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["ngrok-skip-browser-warning"] = "true"
+                return headers
             }
         }
         queue.add(stringRequest)

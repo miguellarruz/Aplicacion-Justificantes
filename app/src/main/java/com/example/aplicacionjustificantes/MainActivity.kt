@@ -36,8 +36,6 @@ class MainActivity : AppCompatActivity() {
     private var institucionRecibida: String = "No especificado"
     private var cedulaRecibida: String = "No especificado"
 
-    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
-    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     private val seleccionarArchivoLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -117,8 +115,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun guardarJustificanteEnBaseDatos() {
-        // 🔥 CORREGIDO: Eliminado el "http://" duplicado porque IP_SERVIDOR ya incluye "https://"
-        val url = "$IP_SERVIDOR/justificantes_api/guardar_justificante.php"
+        // 🔥 CORREGIDO: Usando el objeto global Config
+        val url = "${Config.IP_SERVIDOR}/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
         val fotoBase64 = convertirUriABase64(archivoUri)
 

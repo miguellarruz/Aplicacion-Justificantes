@@ -21,11 +21,8 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var btnRegistrar: Button
     private lateinit var txtVolverLogin: TextView
 
-    // 🌐 TU ENLACE SEGURO DE NGROK ACTUALIZADO
-    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
-
-    // ✅ CORREGIDO: Se quitó el "http://" inicial para que no choque con el https de ngrok
-    private val URL_REGISTRO = "$IP_SERVIDOR/justificantes_api/registrar_usuario.php"
+    // 🔗 Ahora apunta dinámicamente al objeto global Config
+    private val URL_REGISTRO = "${Config.IP_SERVIDOR}/justificantes_api/registrar_usuario.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +46,6 @@ class RegistroActivity : AppCompatActivity() {
             } else if (password.length < 4) {
                 Toast.makeText(this, "La contraseña debe tener al menos 4 caracteres", Toast.LENGTH_SHORT).show()
             } else if (!correo.endsWith("@cecyteq.edu.mx") && !correo.endsWith("@cecyte.edu.mx")) {
-                // ✅ AJUSTADO: Ahora acepta tanto cecyteq (alumnos) como cecyte (enfermería) para evitar bloqueos
                 Toast.makeText(this, "Debes usar tu correo institucional válido", Toast.LENGTH_LONG).show()
             } else {
                 ejecutarRegistro(nombre, matricula, correo, password)
@@ -94,6 +90,12 @@ class RegistroActivity : AppCompatActivity() {
                 params["correo"] = corr
                 params["contrasena"] = pass
                 return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["ngrok-skip-browser-warning"] = "true"
+                return headers
             }
         }
 

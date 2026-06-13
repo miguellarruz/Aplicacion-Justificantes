@@ -23,8 +23,6 @@ class Interfaz : AppCompatActivity() {
 
     private var idUsuarioLogueado: Int = 1
 
-    // 🌐 TU NIEVA IP DE RED ACTUALIZADA (¡Ya incluye https://!)
-    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,8 +86,8 @@ class Interfaz : AppCompatActivity() {
     private fun cargarJustificantesDesdeBaseDatos() {
         contenedorLista.removeAllViews()
 
-        // 🔥 CORREGIDO: Se eliminó el "http://" duplicado de la URL
-        val url = "$IP_SERVIDOR/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
+        // 🔥 CORREGIDO: Usando el objeto global Config
+        val url = "${Config.IP_SERVIDOR}/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,

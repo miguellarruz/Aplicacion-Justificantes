@@ -22,8 +22,6 @@ class PaneldeVisualizacion : AppCompatActivity() {
 
     private var idUsuarioLogueado: Int = 1
 
-    // 🌐 TU ENLACE SEGURO DE NGROK ACTUALIZADO (Sustituye la IP local que fallaba)
-    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +65,8 @@ class PaneldeVisualizacion : AppCompatActivity() {
     }
 
     private fun consultarContadoresServidor() {
-        // ✅ CORREGIDO: Apunta a tu ngrok activo y envía el ID de forma limpia en la URL (GET)
-        val url = "$IP_SERVIDOR/justificantes_api/obtener_estado_justificante.php?id_usuario=$idUsuarioLogueado"
+        // ✅ CORREGIDO: Usando el objeto global Config
+        val url = "${Config.IP_SERVIDOR}/justificantes_api/obtener_estado_justificante.php?id_usuario=$idUsuarioLogueado"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = StringRequest(Request.Method.GET, url,

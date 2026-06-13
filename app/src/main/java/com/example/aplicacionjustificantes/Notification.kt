@@ -17,8 +17,6 @@ class Notification : AppCompatActivity() {
     private lateinit var txtNotisVacias: TextView
     private var idUsuarioLogueado: Int = 1
 
-    // 🌐 TU ENLACE SEGURO DE NGROK ACTUALIZADO
-    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +35,8 @@ class Notification : AppCompatActivity() {
     private fun cargarNotificaciones() {
         contenedorNotificaciones.removeAllViews()
 
-        // ✅ CORREGIDO: Se quitó el "http://" sobrante para evitar el choque http://https://
-        val url = "$IP_SERVIDOR/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
+        // ✅ CORREGIDO: Usando el objeto global Config
+        val url = "${Config.IP_SERVIDOR}/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,

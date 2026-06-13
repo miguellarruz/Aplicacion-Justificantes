@@ -21,10 +21,9 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var txtRegistrarse: TextView
 
 
-    private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
 
-    private val URL_LOGIN = "$IP_SERVIDOR/justificantes_api/login.php"
+    private val URL_LOGIN = "${Config.IP_SERVIDOR}/justificantes_api/login.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
