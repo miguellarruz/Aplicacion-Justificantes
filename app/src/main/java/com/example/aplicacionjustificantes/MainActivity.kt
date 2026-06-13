@@ -117,8 +117,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun guardarJustificanteEnBaseDatos() {
-        // 🔥 CORREGIDO: Ahora usa la variable dinámica con tu IP real activa
-        val url = "http://$IP_SERVIDOR/justificantes_api/guardar_justificante.php"
+        // 🔥 CORREGIDO: Eliminado el "http://" duplicado porque IP_SERVIDOR ya incluye "https://"
+        val url = "$IP_SERVIDOR/justificantes_api/guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
         val fotoBase64 = convertirUriABase64(archivoUri)
 
@@ -146,8 +146,9 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, "Respuesta del servidor: $response", Toast.LENGTH_LONG).show()
                 }
             },
-            Response.ErrorListener {
-                Toast.makeText(this@MainActivity, "Error de red al conectar con el servidor", Toast.LENGTH_LONG).show()
+            Response.ErrorListener { error ->
+                // Agregamos el detalle del error para saber exactamente qué pasa si falla
+                Toast.makeText(this@MainActivity, "Error de red al conectar: ${error.message}", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {

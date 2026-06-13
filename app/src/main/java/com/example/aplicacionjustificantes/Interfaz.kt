@@ -7,7 +7,10 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -20,12 +23,23 @@ class Interfaz : AppCompatActivity() {
 
     private var idUsuarioLogueado: Int = 1
 
-    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+    // 🌐 TU NIEVA IP DE RED ACTUALIZADA (¡Ya incluye https://!)
     private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.interfaz)
+
+        // 📌 CORREGIDO: Ajuste del diseño Edge-to-Edge sobre la raíz '@id/main'
+        val vistaRaiz = findViewById<LinearLayout>(R.id.main)
+        if (vistaRaiz != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(vistaRaiz) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+                insets
+            }
+        }
 
         // Recuperamos el ID real que viene desde el inicio de sesión
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
@@ -57,7 +71,7 @@ class Interfaz : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Cierre de sesión seguro redirigiendo a tu Login exacto
+        // Cierre de sesión seguro
         btnCerrarSesion.setOnClickListener {
             val intent = Intent(this, PrimeraVistaEder::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -66,18 +80,16 @@ class Interfaz : AppCompatActivity() {
         }
     }
 
-    // Cada que el usuario regresa a esta pantalla, refresca la lista automáticamente
     override fun onResume() {
         super.onResume()
         cargarJustificantesDesdeBaseDatos()
     }
 
     private fun cargarJustificantesDesdeBaseDatos() {
-        // Limpiamos la lista anterior para que no se dupliquen las tarjetas visuales
         contenedorLista.removeAllViews()
 
-        // 🔥 CORREGIDO: Ahora apunta de forma segura a tu red local actual
-        val url = "http://$IP_SERVIDOR/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
+        // 🔥 CORREGIDO: Se eliminó el "http://" duplicado de la URL
+        val url = "$IP_SERVIDOR/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url,
@@ -122,7 +134,6 @@ class Interfaz : AppCompatActivity() {
         txtTitulo.text = titulo
         txtMotivo.text = "Motivo: $motivo"
 
-        // Te manda al panel de supervisión detallada si presionas la tarjeta
         vistaJustificante.setOnClickListener {
             val intent = Intent(this, PaneldeVisualizacion::class.java)
             intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)

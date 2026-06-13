@@ -20,11 +20,11 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var btnIngresar: Button
     private lateinit var txtRegistrarse: TextView
 
-    // 🌐 TU NUEVA IP DE RED ACTUALIZADA
+
     private val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
 
-    // ✅ CONFIGURADO: Apunta de forma dinámica a tu servidor XAMPP actual
-    private val URL_LOGIN = "http://$IP_SERVIDOR/justificantes_api/login.php"
+
+    private val URL_LOGIN = "$IP_SERVIDOR/justificantes_api/login.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,8 +117,8 @@ class PrimeraVistaEder : AppCompatActivity() {
                 }
             },
             { error ->
-                // 🔥 CORREGIDO: Mensaje con la IP dinámica real de tu red actual
-                Toast.makeText(this@PrimeraVistaEder, "Error de red en Login: No se pudo conectar a login.php (IP: $IP_SERVIDOR)", Toast.LENGTH_LONG).show()
+                // Mensaje informativo con la causa real del error de red
+                Toast.makeText(this@PrimeraVistaEder, "Error de red en Login: ${error.message}", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
