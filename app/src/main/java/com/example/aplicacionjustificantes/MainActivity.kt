@@ -115,7 +115,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun guardarJustificanteEnBaseDatos() {
-        val url = "${Config.IP_SERVIDOR}/justificantes_api/guardar_justificante.php"
+        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de forma nativa
+        val url = "${Config.IP_SERVIDOR}guardar_justificante.php"
         val queue = Volley.newRequestQueue(this)
         val fotoBase64 = convertirUriABase64(archivoUri)
 
@@ -137,7 +138,6 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity, "¡Éxito!: $message", Toast.LENGTH_LONG).show()
                         finish()
                     } else {
-                        // Si da error de Llave Foránea, este Toast te dirá exactamente qué ID falló
                         Toast.makeText(this@MainActivity, "Error en Servidor: $message", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
@@ -145,7 +145,8 @@ class MainActivity : AppCompatActivity() {
                 }
             },
             Response.ErrorListener { error ->
-                Toast.makeText(this@MainActivity, "Error de red al conectar: ${error.message}", Toast.LENGTH_LONG).show()
+                val msgError = error.message ?: "Filtro de seguridad del servidor o desbordamiento"
+                Toast.makeText(this@MainActivity, "Error de red al conectar: $msgError", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
@@ -161,8 +162,8 @@ class MainActivity : AppCompatActivity() {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                // 🚀 Cabecera indispensable para saltar el bloqueo automático de ngrok
-                headers["ngrok-skip-browser-warning"] = "true"
+                // 🚀 TRUCO CLAVE: Cabecera obligatoria para saltar el firewall anti-bots de AwardSpace
+                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
                 return headers
             }

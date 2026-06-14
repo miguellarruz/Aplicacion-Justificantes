@@ -81,11 +81,11 @@ class Interfaz : AppCompatActivity() {
     private fun cargarJustificantesDesdeBaseDatos() {
         contenedorLista.removeAllViews()
 
-        val url = "${Config.IP_SERVIDOR}/justificantes_api/listar_justificantes.php?id_usuario=$idUsuarioLogueado"
+        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de manera nativa
+        val url = "${Config.IP_SERVIDOR}listar_justificantes.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
 
-        // Convertimos a un objeto StringRequest explícito para poder sobreescribir sus métodos
         val stringRequest = object : StringRequest(Request.Method.GET, url,
             { response ->
                 try {
@@ -93,7 +93,7 @@ class Interfaz : AppCompatActivity() {
                     val status = jsonResponse.getString("status")
 
                     if (status == "success") {
-                        // 📌 CORREGIDO: Tu PHP retorna la clave "data", no "datos"
+                        // El PHP retorna la clave "data"
                         val jsonArray = jsonResponse.getJSONArray("data")
 
                         for (i in 0 until jsonArray.length()) {
@@ -112,14 +112,15 @@ class Interfaz : AppCompatActivity() {
                 }
             },
             { error ->
-                Toast.makeText(this, "Error de conexión con el servidor principal", Toast.LENGTH_SHORT).show()
+                val msgError = error.message ?: "Filtro de seguridad o error de red"
+                Toast.makeText(this, "Error de conexión con el servidor principal: $msgError", Toast.LENGTH_SHORT).show()
                 actualizarVisibilidadHistorial()
             }
         ) {
-            // 🔥 AGREGADO: Cabecera indispensable para saltarse el filtro de ngrok
+            // 🚀 TRUCO CLAVE: Cabecera obligatoria para evadir el bloqueo anti-bots de AwardSpace
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                headers["ngrok-skip-browser-warning"] = "true"
+                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 return headers
             }
         }

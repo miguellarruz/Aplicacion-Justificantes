@@ -17,7 +17,6 @@ class Notification : AppCompatActivity() {
     private lateinit var txtNotisVacias: TextView
     private var idUsuarioLogueado: Int = 1
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.notis)
@@ -35,11 +34,13 @@ class Notification : AppCompatActivity() {
     private fun cargarNotificaciones() {
         contenedorNotificaciones.removeAllViews()
 
-        // ✅ CORREGIDO: Usando el objeto global Config
-        val url = "${Config.IP_SERVIDOR}/justificantes_api/listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
+        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de forma nativa
+        val url = "${Config.IP_SERVIDOR}listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
 
         val queue = Volley.newRequestQueue(this)
-        val stringRequest = StringRequest(Request.Method.GET, url,
+
+        // 🛠️ CORREGIDO: Convertido a 'object : StringRequest' para inyectar cabeceras a AwardSpace
+        val stringRequest = object : StringRequest(Request.Method.GET, url,
             { response ->
                 try {
                     val jsonResponse = JSONObject(response)
@@ -65,10 +66,18 @@ class Notification : AppCompatActivity() {
                 }
             },
             { error ->
-                Toast.makeText(this, "Error al conectar con las notificaciones", Toast.LENGTH_SHORT).show()
+                val msgError = error.message ?: "Filtro del hosting o problema de conexión"
+                Toast.makeText(this, "Error al conectar con las notificaciones: $msgError", Toast.LENGTH_SHORT).show()
                 actualizarVisibilidadNotis()
             }
-        )
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                // 🚀 TRUCO CLAVE: Cabecera obligatoria para saltar el firewall anti-bots de AwardSpace
+                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                return headers
+            }
+        }
 
         queue.add(stringRequest)
     }

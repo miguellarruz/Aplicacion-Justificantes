@@ -22,7 +22,6 @@ class PaneldeVisualizacion : AppCompatActivity() {
 
     private var idUsuarioLogueado: Int = 1
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,7 +54,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
                 finish()
             }
 
-            // Consultar a la base de datos en tiempo real mediante el túnel seguro
+            // Consultar a la base de datos en tiempo real mediante el servidor
             consultarContadoresServidor()
 
         } catch (e: Exception) {
@@ -65,11 +64,12 @@ class PaneldeVisualizacion : AppCompatActivity() {
     }
 
     private fun consultarContadoresServidor() {
-        // ✅ CORREGIDO: Usando el objeto global Config
-        val url = "${Config.IP_SERVIDOR}/justificantes_api/obtener_estado_justificante.php?id_usuario=$idUsuarioLogueado"
+        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de forma nativa
+        val url = "${Config.IP_SERVIDOR}obtener_estado_justificante.php?id_usuario=$idUsuarioLogueado"
         val queue = Volley.newRequestQueue(this)
 
-        val stringRequest = StringRequest(Request.Method.GET, url,
+        // 🛠️ CORREGIDO: Convertido a 'object' para poder inyectar los Headers requeridos por AwardSpace
+        val stringRequest = object : StringRequest(Request.Method.GET, url,
             { response ->
                 try {
                     val jsonResponse = JSONObject(response)
@@ -88,9 +88,18 @@ class PaneldeVisualizacion : AppCompatActivity() {
                 }
             },
             { error ->
-                Toast.makeText(this, "Error de red al cargar el panel de estados", Toast.LENGTH_SHORT).show()
+                val msgError = error.message ?: "Filtro de seguridad del hosting o problema de red"
+                Toast.makeText(this, "Error de red al cargar el panel de estados: $msgError", Toast.LENGTH_SHORT).show()
             }
-        )
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                // 🚀 TRUCO CLAVE: Encabezado obligatorio para saltar el firewall anti-bots del hosting gratuito
+                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                return headers
+            }
+        }
+
         queue.add(stringRequest)
     }
 

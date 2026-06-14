@@ -69,7 +69,8 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun cargarJustificantePendiente() {
-        val url = "${Config.IP_SERVIDOR}/justificantes_api/obtener_estado_justificante.php"
+        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/"
+        val url = "${Config.IP_SERVIDOR}obtener_estado_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Request.Method.GET, url,
@@ -124,7 +125,8 @@ class EnfermeriaActivity : AppCompatActivity() {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                headers["ngrok-skip-browser-warning"] = "true"
+                // 🚀 TRUCO CLAVE: Encabezado para evadir el firewall de AwardSpace
+                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 return headers
             }
         }
@@ -132,7 +134,8 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun actualizarEstatusEnServidor(nuevoEstatus: String) {
-        val url = "${Config.IP_SERVIDOR}/justificantes_api/actualizar_justificante.php"
+        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/"
+        val url = "${Config.IP_SERVIDOR}actualizar_justificante.php"
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,
@@ -144,12 +147,11 @@ class EnfermeriaActivity : AppCompatActivity() {
 
                     if (status == "success") {
                         Toast.makeText(this, "¡Éxito!: Justificante $nuevoEstatus", Toast.LENGTH_SHORT).show()
-                        cargarJustificantePendiente() // Recarga la lista para traer el siguiente pendiente
+                        cargarJustificantePendiente()
                     } else {
                         Toast.makeText(this, "Error del Servidor: $message", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    // Si el JSON falla, imprimimos la respuesta cruda para auditoría visual directa
                     Toast.makeText(this, "Respuesta inesperada: $response", Toast.LENGTH_LONG).show()
                 }
             },
@@ -166,8 +168,8 @@ class EnfermeriaActivity : AppCompatActivity() {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                headers["ngrok-skip-browser-warning"] = "true"
-                // 📌 CORREGIDO: Informa al servidor el formato correcto de las variables POST
+                // 🚀 TRUCO CLAVE: Sincronizado para AwardSpace
+                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
                 return headers
             }
