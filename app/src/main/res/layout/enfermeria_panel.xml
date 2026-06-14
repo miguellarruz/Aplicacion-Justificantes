@@ -1,4 +1,52 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?php
+    header('Content-Type: application/json; charset=utf-8');
+
+    // 🔌 CREDENCIALES ACTUALIZADAS PARA TU SERVIDOR WEB (INFINITYFREE)
+    $servidor   = "sql208.infinityfree.com";      // 👈 Tu MySQL Host Name
+    $usuario    = "if0_42183232";                  // 👈 Tu MySQL User Name
+    $password   = "jQZELPSAaYecn1";                // 👈 Tu vPanel Password
+    $base_datos = "if0_42183232_justificantes_db"; // 👈 Tu MySQL DB Name
+
+    // Conexión directa a internet sin puerto ni localhost
+    $conexion = mysqli_connect($servidor, $usuario, $password, $base_datos);
+
+    if (!$conexion) {
+    echo json_encode(["status" => "error", "message" => "Error de conexión web: " . mysqli_connect_error()]);
+    exit();
+    }
+
+    // Configurar caracteres correctos para evitar problemas de comunicación
+    mysqli_set_charset($conexion, "utf8mb4");
+
+    $id_usuario = isset($_GET['id_usuario']) ? $_GET['id_usuario'] : '';
+
+    if (empty($id_usuario)) {
+    echo json_encode(["status" => "error", "message" => "Falta ID de usuario"]);
+    exit();
+    }
+
+    // 📌 Consulta optimizada para buscar el estatus del justificante más reciente
+    $query = "SELECT estatus FROM justificantes WHERE id_usuario = ? ORDER BY id DESC LIMIT 1";
+    $stmt = mysqli_prepare($conexion, $query);
+
+    if ($stmt) {
+    mysqli_stmt_bind_param($stmt, "i", $id_usuario);
+    mysqli_stmt_execute($stmt);
+    $resultado = mysqli_stmt_get_result($stmt);
+
+    if ($fila = mysqli_fetch_assoc($resultado)) {
+    // Le mandamos el dato a Kotlin
+    echo json_encode(["status" => "success", "estado" => $fila['estatus']]);
+    } else {
+    echo json_encode(["status" => "vacio", "message" => "No hay justificantes"]);
+    }
+    mysqli_stmt_close($stmt);
+    } else {
+    echo json_encode(["status" => "error", "message" => mysqli_error($conexion)]);
+    }
+
+    mysqli_close($conexion);
+    ?><?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
