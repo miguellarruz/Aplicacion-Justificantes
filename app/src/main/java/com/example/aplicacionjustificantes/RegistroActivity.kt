@@ -1,107 +1,133 @@
 package com.example.aplicacionjustificantes
 
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+import com.example.aplicacionjustificantes.databinding.ActivityRegistroBinding
 import org.json.JSONObject
 
 class RegistroActivity : AppCompatActivity() {
 
-    private lateinit var edtNombre: EditText
-    private lateinit var edtMatricula: EditText
-    private lateinit var edtCorreo: EditText
-    private lateinit var edtPassword: EditText
-    private lateinit var btnRegistrar: Button
-    private lateinit var txtVolverLogin: TextView
+    // Usamos View Binding para una vinculación segura y eficiente con el XML
+    private lateinit var binding: ActivityRegistroBinding
 
-    // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/", solo añadimos el archivo PHP
+    // 🔑 La URL base se toma de Config para mantener el orden
     private val URL_REGISTRO = "${Config.IP_SERVIDOR}registrar_usuario.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_registro)
+        binding = ActivityRegistroBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        edtNombre = findViewById(R.id.edtNombreReg)
-        edtMatricula = findViewById(R.id.edtMatriculaReg)
-        edtCorreo = findViewById(R.id.edtCorreoReg)
-        edtPassword = findViewById(R.id.edtPasswordReg)
-        btnRegistrar = findViewById(R.id.btnRegistrarReg)
-        txtVolverLogin = findViewById(R.id.txtLoginReg)
-
-        btnRegistrar.setOnClickListener {
-            val nombre = edtNombre.text.toString().trim()
-            val matricula = edtMatricula.text.toString().trim()
-            val correo = edtCorreo.text.toString().trim()
-            val password = edtPassword.text.toString().trim()
-
-            if (nombre.isEmpty() || matricula.isEmpty() || correo.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, getString(R.string.llena_campos), Toast.LENGTH_SHORT).show()
-            } else if (password.length < 4) {
-                Toast.makeText(this, "La contraseña debe tener al menos 4 caracteres", Toast.LENGTH_SHORT).show()
-            } else if (!correo.endsWith("@cecyteq.edu.mx") && !correo.endsWith("@cecyte.edu.mx")) {
-                Toast.makeText(this, "Debes usar tu correo institucional válido", Toast.LENGTH_LONG).show()
-            } else {
-                ejecutarRegistro(nombre, matricula, correo, password)
+        // Listener del botón de registro
+        binding.btnRegistrarReg.setOnClickListener {
+            if (validarCampos()) {
+                ejecutarRegistro()
             }
         }
 
-        txtVolverLogin.setOnClickListener {
+        // Volver al login
+        binding.txtLoginReg.setOnClickListener {
             finish()
         }
     }
 
-    private fun ejecutarRegistro(nom: String, mat: String, corr: String, pass: String) {
-        val queue = Volley.newRequestQueue(this)
+    /**
+     * Valida que los datos ingresados sean correctos antes de enviarlos al servidor.
+     * Utiliza TextInputLayout para mostrar errores de forma visualmente atractiva.
+     */
+    private fun validarCampos(): Boolean {
+        var esValido = true
+
+        val nombre = binding.edtNombreReg.text.toString().trim()
+        val matricula = binding.edtMatriculaReg.text.toString().trim()
+        val correo = binding.edtCorreoReg.text.toString().trim()
+        val password = binding.edtPasswordReg.text.toString().trim()
+
+        // Limpiar errores previos
+        binding.tilNombreReg.error = null
+        binding.tilMatriculaReg.error = null
+        binding.tilCorreoReg.error = null
+        binding.tilPasswordReg.error = null
+
+        if (nombre.isEmpty()) {
+            binding.tilNombreReg.error = getString(R.string.llena_campos)
+            esValido = false
+        }
+
+        if (matricula.isEmpty()) {
+            binding.tilMatriculaReg.error = getString(R.string.llena_campos)
+            esValido = false
+        }
+
+        if (correo.isEmpty()) {
+            binding.tilCorreoReg.error = getString(R.string.llena_campos)
+            esValido = false
+        } else if (!correo.endsWith("@cecyteq.edu.mx") && !correo.endsWith("@cecyte.edu.mx")) {
+            binding.tilCorreoReg.error = "Debes usar tu correo institucional (@cecyteq.edu.mx)"
+            esValido = false
+        }
+
+        if (password.length < 6) {
+            // Se usa el string de error_password_corta definido en strings.xml (6 caracteres)
+            binding.tilPasswordReg.error = getString(R.string.error_password_corta)
+            esValido = false
+        }
+
+        return esValido
+    }
+
+    private fun ejecutarRegistro() {
+        // Deshabilitamos el botón para evitar registros duplicados por clics accidentales
+        binding.btnRegistrarReg.isEnabled = false
 
         val stringRequest = object : StringRequest(
             Request.Method.POST,
             URL_REGISTRO,
             { response ->
+                binding.btnRegistrarReg.isEnabled = true
                 try {
-                    val jsonResponse = JSONObject(response)
-                    val status = jsonResponse.getString("status")
-                    val message = jsonResponse.getString("message")
+                    // Limpiamos la respuesta por si el servidor devuelve espacios en blanco
+                    val jsonResponse = JSONObject(response.trim())
+                    val status = jsonResponse.optString("status")
+                    val message = jsonResponse.optString("message", "Sin mensaje del servidor")
 
                     if (status == "success") {
-                        Toast.makeText(this@RegistroActivity, "¡Registro exitoso en el servidor!", Toast.LENGTH_LONG).show()
+                        val nombre = binding.edtNombreReg.text.toString()
+                        Toast.makeText(this, getString(R.string.registro_exitoso, nombre), Toast.LENGTH_LONG).show()
                         finish()
                     } else {
-                        Toast.makeText(this@RegistroActivity, message, Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this@RegistroActivity, "Respuesta del servidor: $response", Toast.LENGTH_LONG).show()
+                    // Si falla el parseo JSON, mostramos la respuesta cruda para diagnóstico
+                    Toast.makeText(this, "Respuesta inesperada: $response", Toast.LENGTH_LONG).show()
                 }
             },
             { error ->
-                val msgError = error.message ?: "Código de respuesta inesperado"
-                Toast.makeText(this@RegistroActivity, "Error de red en Registro: $msgError", Toast.LENGTH_LONG).show()
+                binding.btnRegistrarReg.isEnabled = true
+                val msgError = error.message ?: "Error desconocido de red"
+                Toast.makeText(this, "Error de red: $msgError", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
-                val params = HashMap<String, String>()
-                params["nombre"] = nom
-                params["matricula"] = mat
-                params["correo"] = corr
-                // ⚠️ Sincronizado: Enviamos 'contrasena' por POST, tu registrar_usuario.php lo recibe así.
-                params["contrasena"] = pass
-                return params
+                return mutableMapOf(
+                    "nombre" to binding.edtNombreReg.text.toString().trim(),
+                    "matricula" to binding.edtMatriculaReg.text.toString().trim(),
+                    "correo" to binding.edtCorreoReg.text.toString().trim(),
+                    "contrasena" to binding.edtPasswordReg.text.toString().trim()
+                )
             }
 
             override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                // 🚀 TRUCO CLAVE: Engañamos a AwardSpace simulando ser un navegador Chrome para saltar el filtro anti-bots
-                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                return headers
+                // Centralizamos el User-Agent en Config para evitar repeticiones
+                return mutableMapOf("User-Agent" to Config.USER_AGENT)
             }
         }
 
-        queue.add(stringRequest)
+        // Usamos el Singleton de Volley para manejar la cola de peticiones globalmente
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest)
     }
 }
