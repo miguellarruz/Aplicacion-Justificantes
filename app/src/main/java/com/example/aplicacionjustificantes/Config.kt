@@ -1,5 +1,5 @@
 package com.example.aplicacionjustificantes
 
 object Config {
-    const val IP_SERVIDOR = "https://wriggle-luster-renderer.ngrok-free.dev"
+    const val URL_BASE = "http://justificateq.xo.je/justificantes_api/"
 }
