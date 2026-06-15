@@ -65,7 +65,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
 
     private fun consultarContadoresServidor() {
         // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de forma nativa
-        val url = "${Config.IP_SERVIDOR}obtener_estado_justificante.php?id_usuario=$idUsuarioLogueado"
+        val url = Config.endpoint("obtener_estado_justificante.php?id_usuario=$idUsuarioLogueado")
         val queue = Volley.newRequestQueue(this)
 
         // 🛠️ CORREGIDO: Convertido a 'object' para poder inyectar los Headers requeridos por AwardSpace
@@ -88,19 +88,19 @@ class PaneldeVisualizacion : AppCompatActivity() {
                 }
             },
             { error ->
-                val msgError = error.message ?: "Filtro de seguridad del hosting o problema de red"
+                val msgError = NetworkUtils.errorMessage(error)
                 Toast.makeText(this, "Error de red al cargar el panel de estados: $msgError", Toast.LENGTH_SHORT).show()
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 // 🚀 TRUCO CLAVE: Encabezado obligatorio para saltar el firewall anti-bots del hosting gratuito
-                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                headers.putAll(Config.headers())
                 return headers
             }
         }
 
-        queue.add(stringRequest)
+        queue.add(NetworkUtils.prepare(stringRequest))
     }
 
     private fun mostrarDatosEnPanel(pendientes: Int, aprobados: Int, rechazados: Int) {

@@ -35,7 +35,7 @@ class Notification : AppCompatActivity() {
         contenedorNotificaciones.removeAllViews()
 
         // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de forma nativa
-        val url = "${Config.IP_SERVIDOR}listar_notificaciones.php?id_usuario=$idUsuarioLogueado"
+        val url = Config.endpoint("listar_notificaciones.php?id_usuario=$idUsuarioLogueado")
 
         val queue = Volley.newRequestQueue(this)
 
@@ -66,7 +66,7 @@ class Notification : AppCompatActivity() {
                 }
             },
             { error ->
-                val msgError = error.message ?: "Filtro del hosting o problema de conexión"
+                val msgError = NetworkUtils.errorMessage(error)
                 Toast.makeText(this, "Error al conectar con las notificaciones: $msgError", Toast.LENGTH_SHORT).show()
                 actualizarVisibilidadNotis()
             }
@@ -74,12 +74,12 @@ class Notification : AppCompatActivity() {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 // 🚀 TRUCO CLAVE: Cabecera obligatoria para saltar el firewall anti-bots de AwardSpace
-                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                headers.putAll(Config.headers())
                 return headers
             }
         }
 
-        queue.add(stringRequest)
+        queue.add(NetworkUtils.prepare(stringRequest))
     }
 
     private fun agregarNotificacionALaLista(estatus: String, motivo: String) {

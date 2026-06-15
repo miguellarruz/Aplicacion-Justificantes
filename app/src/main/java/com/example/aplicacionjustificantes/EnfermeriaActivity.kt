@@ -70,7 +70,7 @@ class EnfermeriaActivity : AppCompatActivity() {
 
     private fun cargarJustificantePendiente() {
         // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/"
-        val url = "${Config.IP_SERVIDOR}obtener_estado_justificante.php"
+        val url = Config.endpoint("obtener_estado_justificante.php")
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Request.Method.GET, url,
@@ -119,23 +119,27 @@ class EnfermeriaActivity : AppCompatActivity() {
                     mostrarPantallaVacia()
                 }
             },
-            {
-                Toast.makeText(this, "Error de red al conectar con Enfermería", Toast.LENGTH_SHORT).show()
+            { error ->
+                Toast.makeText(
+                    this,
+                    "Error de red al conectar con Enfermeria: ${NetworkUtils.errorMessage(error)}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 // 🚀 TRUCO CLAVE: Encabezado para evadir el firewall de AwardSpace
-                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                headers.putAll(Config.headers())
                 return headers
             }
         }
-        queue.add(stringRequest)
+        queue.add(NetworkUtils.prepare(stringRequest))
     }
 
     private fun actualizarEstatusEnServidor(nuevoEstatus: String) {
         // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/"
-        val url = "${Config.IP_SERVIDOR}actualizar_justificante.php"
+        val url = Config.endpoint("actualizar_justificante.php")
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = object : StringRequest(Method.POST, url,
@@ -156,7 +160,7 @@ class EnfermeriaActivity : AppCompatActivity() {
                 }
             },
             { error ->
-                Toast.makeText(this, "Fallo de red: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Fallo de red: ${NetworkUtils.errorMessage(error)}", Toast.LENGTH_LONG).show()
             }
         ) {
             override fun getParams(): MutableMap<String, String> {
@@ -169,12 +173,11 @@ class EnfermeriaActivity : AppCompatActivity() {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 // 🚀 TRUCO CLAVE: Sincronizado para AwardSpace
-                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                headers["Content-Type"] = "application/x-www-form-urlencoded"
+                headers.putAll(Config.headers())
                 return headers
             }
         }
-        queue.add(stringRequest)
+        queue.add(NetworkUtils.prepare(stringRequest))
     }
 
     private fun mostrarPantallaVacia() {

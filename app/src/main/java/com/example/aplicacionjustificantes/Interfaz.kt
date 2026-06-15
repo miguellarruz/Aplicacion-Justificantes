@@ -82,7 +82,7 @@ class Interfaz : AppCompatActivity() {
         contenedorLista.removeAllViews()
 
         // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de manera nativa
-        val url = "${Config.IP_SERVIDOR}listar_justificantes.php?id_usuario=$idUsuarioLogueado"
+        val url = Config.endpoint("listar_justificantes.php?id_usuario=$idUsuarioLogueado")
 
         val queue = Volley.newRequestQueue(this)
 
@@ -112,7 +112,7 @@ class Interfaz : AppCompatActivity() {
                 }
             },
             { error ->
-                val msgError = error.message ?: "Filtro de seguridad o error de red"
+                val msgError = NetworkUtils.errorMessage(error)
                 Toast.makeText(this, "Error de conexión con el servidor principal: $msgError", Toast.LENGTH_SHORT).show()
                 actualizarVisibilidadHistorial()
             }
@@ -120,12 +120,12 @@ class Interfaz : AppCompatActivity() {
             // 🚀 TRUCO CLAVE: Cabecera obligatoria para evadir el bloqueo anti-bots de AwardSpace
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                headers.putAll(Config.headers())
                 return headers
             }
         }
 
-        queue.add(stringRequest)
+        queue.add(NetworkUtils.prepare(stringRequest))
     }
 
     private fun agregarJustificanteALaLista(titulo: String, motivo: String) {

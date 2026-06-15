@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun guardarJustificanteEnBaseDatos() {
         // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de forma nativa
-        val url = "${Config.IP_SERVIDOR}guardar_justificante.php"
+        val url = Config.endpoint("guardar_justificante.php")
         val queue = Volley.newRequestQueue(this)
         val fotoBase64 = convertirUriABase64(archivoUri)
 
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                 }
             },
             Response.ErrorListener { error ->
-                val msgError = error.message ?: "Filtro de seguridad del servidor o desbordamiento"
+                val msgError = NetworkUtils.errorMessage(error)
                 Toast.makeText(this@MainActivity, "Error de red al conectar: $msgError", Toast.LENGTH_LONG).show()
             }
         ) {
@@ -163,13 +163,12 @@ class MainActivity : AppCompatActivity() {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 // 🚀 TRUCO CLAVE: Cabecera obligatoria para saltar el firewall anti-bots de AwardSpace
-                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                headers["Content-Type"] = "application/x-www-form-urlencoded"
+                headers.putAll(Config.headers())
                 return headers
             }
         }
 
-        queue.add(stringRequest)
+        queue.add(NetworkUtils.prepare(stringRequest))
     }
 
     private fun seleccionarArchivo() {

@@ -21,7 +21,7 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var txtRegistrarse: TextView
 
     // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/"
-    private val URL_LOGIN = "${Config.IP_SERVIDOR}login.php"
+    private val URL_LOGIN = Config.endpoint("login.php")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,7 +114,7 @@ class PrimeraVistaEder : AppCompatActivity() {
                 }
             },
             { error ->
-                val msgError = error.message ?: "Filtro de seguridad del servidor o credenciales no válidas"
+                val msgError = NetworkUtils.errorMessage(error)
                 Toast.makeText(this@PrimeraVistaEder, "Error de red en Login: $msgError", Toast.LENGTH_LONG).show()
             }
         ) {
@@ -128,11 +128,11 @@ class PrimeraVistaEder : AppCompatActivity() {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 // 🚀 TRUCO CLAVE: Cabecera obligatoria para saltar la validación anti-bots de AwardSpace
-                headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                headers.putAll(Config.headers())
                 return headers
             }
         }
 
-        queue.add(stringRequest)
+        queue.add(NetworkUtils.prepare(stringRequest))
     }
 }

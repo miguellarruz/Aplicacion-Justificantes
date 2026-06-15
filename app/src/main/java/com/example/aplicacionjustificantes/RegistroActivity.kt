@@ -14,7 +14,7 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegistroBinding
 
     // 🔑 La URL base se toma de Config para mantener el orden
-    private val URL_REGISTRO = "${Config.IP_SERVIDOR}registrar_usuario.php"
+    private val URL_REGISTRO = Config.endpoint("registrar_usuario.php")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,7 +108,7 @@ class RegistroActivity : AppCompatActivity() {
             },
             { error ->
                 binding.btnRegistrarReg.isEnabled = true
-                val msgError = error.message ?: "Error desconocido de red"
+                val msgError = NetworkUtils.errorMessage(error)
                 Toast.makeText(this, "Error de red: $msgError", Toast.LENGTH_LONG).show()
             }
         ) {
@@ -122,12 +122,11 @@ class RegistroActivity : AppCompatActivity() {
             }
 
             override fun getHeaders(): MutableMap<String, String> {
-                // Centralizamos el User-Agent en Config para evitar repeticiones
-                return mutableMapOf("User-Agent" to Config.USER_AGENT)
+                return Config.headers()
             }
         }
 
         // Usamos el Singleton de Volley para manejar la cola de peticiones globalmente
-        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest)
+        VolleySingleton.getInstance(this).addToRequestQueue(NetworkUtils.prepare(stringRequest))
     }
 }
