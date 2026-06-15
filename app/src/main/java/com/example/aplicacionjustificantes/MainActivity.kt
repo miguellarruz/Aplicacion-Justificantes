@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                // 🚀 TRUCO CLAVE: Cabecera obligatoria para saltar el firewall anti-bots de AwardSpace
+
                 headers.putAll(Config.headers())
                 return headers
             }

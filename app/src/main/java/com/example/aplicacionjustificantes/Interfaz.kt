@@ -81,7 +81,7 @@ class Interfaz : AppCompatActivity() {
     private fun cargarJustificantesDesdeBaseDatos() {
         contenedorLista.removeAllViews()
 
-        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de manera nativa
+
         val url = Config.endpoint("listar_justificantes.php?id_usuario=$idUsuarioLogueado")
 
         val queue = Volley.newRequestQueue(this)
@@ -117,7 +117,7 @@ class Interfaz : AppCompatActivity() {
                 actualizarVisibilidadHistorial()
             }
         ) {
-            // 🚀 TRUCO CLAVE: Cabecera obligatoria para evadir el bloqueo anti-bots de AwardSpace
+
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 headers.putAll(Config.headers())

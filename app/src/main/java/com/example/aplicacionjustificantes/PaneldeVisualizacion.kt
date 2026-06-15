@@ -28,24 +28,24 @@ class PaneldeVisualizacion : AppCompatActivity() {
         try {
             setContentView(R.layout.panel)
 
-            // Capturamos el ID del usuario enviado desde Interfaz
+
             idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
-            // Vincular componentes del XML
+
             tvTituloPanel = findViewById(R.id.tvTituloPanel)
             tvContadorPendiente = findViewById(R.id.tvContadorPendiente)
             tvContadorAprobado = findViewById(R.id.tvContadorAprobado)
             tvContadorRechazado = findViewById(R.id.tvContadorRechazado)
             btnRegresarInterfaz = findViewById(R.id.btnRegresarInterfaz)
 
-            // Recuperar el nombre guardado en memoria interna
+
             val sharedPreferences = getSharedPreferences("SesionUsuario", Context.MODE_PRIVATE)
             val nombreUsuario = sharedPreferences.getString("nombre_cuenta", "Usuario")
 
-            // Inyectamos el texto dinámico en el título
+
             tvTituloPanel.text = "Panel de visualización de estados (Pendiente, Aprobado, Rechazado) ($nombreUsuario)"
 
-            // Configurar el botón para volver atrás sin romper la cadena del ID
+
             btnRegresarInterfaz.setOnClickListener {
                 val intent = Intent(this, Interfaz::class.java)
                 intent.putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
@@ -54,7 +54,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
                 finish()
             }
 
-            // Consultar a la base de datos en tiempo real mediante el servidor
+
             consultarContadoresServidor()
 
         } catch (e: Exception) {
@@ -64,11 +64,11 @@ class PaneldeVisualizacion : AppCompatActivity() {
     }
 
     private fun consultarContadoresServidor() {
-        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de forma nativa
+
         val url = Config.endpoint("obtener_estado_justificante.php?id_usuario=$idUsuarioLogueado")
         val queue = Volley.newRequestQueue(this)
 
-        // 🛠️ CORREGIDO: Convertido a 'object' para poder inyectar los Headers requeridos por AwardSpace
+
         val stringRequest = object : StringRequest(Request.Method.GET, url,
             { response ->
                 try {
@@ -80,7 +80,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
                         val aprobados = jsonResponse.getInt("aprobados")
                         val rechazados = jsonResponse.getInt("rechazados")
 
-                        // Inyectamos los números calculados por la base de datos
+
                         mostrarDatosEnPanel(pendientes, aprobados, rechazados)
                     }
                 } catch (e: Exception) {
@@ -94,7 +94,7 @@ class PaneldeVisualizacion : AppCompatActivity() {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                // 🚀 TRUCO CLAVE: Encabezado obligatorio para saltar el firewall anti-bots del hosting gratuito
+
                 headers.putAll(Config.headers())
                 return headers
             }

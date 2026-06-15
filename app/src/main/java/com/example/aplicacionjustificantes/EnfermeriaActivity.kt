@@ -69,7 +69,7 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun cargarJustificantePendiente() {
-        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/"
+
         val url = Config.endpoint("obtener_estado_justificante.php")
         val queue = Volley.newRequestQueue(this)
 
@@ -129,7 +129,7 @@ class EnfermeriaActivity : AppCompatActivity() {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                // 🚀 TRUCO CLAVE: Encabezado para evadir el firewall de AwardSpace
+
                 headers.putAll(Config.headers())
                 return headers
             }
@@ -138,7 +138,7 @@ class EnfermeriaActivity : AppCompatActivity() {
     }
 
     private fun actualizarEstatusEnServidor(nuevoEstatus: String) {
-        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/"
+
         val url = Config.endpoint("actualizar_justificante.php")
         val queue = Volley.newRequestQueue(this)
 
@@ -172,7 +172,7 @@ class EnfermeriaActivity : AppCompatActivity() {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                // 🚀 TRUCO CLAVE: Sincronizado para AwardSpace
+
                 headers.putAll(Config.headers())
                 return headers
             }

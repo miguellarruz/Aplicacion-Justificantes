@@ -10,10 +10,9 @@ import org.json.JSONObject
 
 class RegistroActivity : AppCompatActivity() {
 
-    // Usamos View Binding para una vinculación segura y eficiente con el XML
+
     private lateinit var binding: ActivityRegistroBinding
 
-    // 🔑 La URL base se toma de Config para mantener el orden
     private val URL_REGISTRO = Config.endpoint("registrar_usuario.php")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,23 +20,20 @@ class RegistroActivity : AppCompatActivity() {
         binding = ActivityRegistroBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Listener del botón de registro
+
         binding.btnRegistrarReg.setOnClickListener {
             if (validarCampos()) {
                 ejecutarRegistro()
             }
         }
 
-        // Volver al login
+
         binding.txtLoginReg.setOnClickListener {
             finish()
         }
     }
 
-    /**
-     * Valida que los datos ingresados sean correctos antes de enviarlos al servidor.
-     * Utiliza TextInputLayout para mostrar errores de forma visualmente atractiva.
-     */
+
     private fun validarCampos(): Boolean {
         var esValido = true
 
@@ -46,7 +42,7 @@ class RegistroActivity : AppCompatActivity() {
         val correo = binding.edtCorreoReg.text.toString().trim()
         val password = binding.edtPasswordReg.text.toString().trim()
 
-        // Limpiar errores previos
+
         binding.tilNombreReg.error = null
         binding.tilMatriculaReg.error = null
         binding.tilCorreoReg.error = null
@@ -80,7 +76,7 @@ class RegistroActivity : AppCompatActivity() {
     }
 
     private fun ejecutarRegistro() {
-        // Deshabilitamos el botón para evitar registros duplicados por clics accidentales
+
         binding.btnRegistrarReg.isEnabled = false
 
         val stringRequest = object : StringRequest(
@@ -89,7 +85,7 @@ class RegistroActivity : AppCompatActivity() {
             { response ->
                 binding.btnRegistrarReg.isEnabled = true
                 try {
-                    // Limpiamos la respuesta por si el servidor devuelve espacios en blanco
+
                     val jsonResponse = JSONObject(response.trim())
                     val status = jsonResponse.optString("status")
                     val message = jsonResponse.optString("message", "Sin mensaje del servidor")
@@ -102,7 +98,7 @@ class RegistroActivity : AppCompatActivity() {
                         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    // Si falla el parseo JSON, mostramos la respuesta cruda para diagnóstico
+
                     Toast.makeText(this, "Respuesta inesperada: $response", Toast.LENGTH_LONG).show()
                 }
             },
@@ -126,7 +122,7 @@ class RegistroActivity : AppCompatActivity() {
             }
         }
 
-        // Usamos el Singleton de Volley para manejar la cola de peticiones globalmente
+
         VolleySingleton.getInstance(this).addToRequestQueue(NetworkUtils.prepare(stringRequest))
     }
 }

@@ -20,20 +20,19 @@ class PrimeraVistaEder : AppCompatActivity() {
     private lateinit var btnIngresar: Button
     private lateinit var txtRegistrarse: TextView
 
-    // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/"
+
     private val URL_LOGIN = Config.endpoint("login.php")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.eder_vista)
 
-        // Inicializar los componentes usando los IDs exactos de tu XML
+
         edtCorreo = findViewById(R.id.edtCorreoEder)
         edtPassword = findViewById(R.id.edtPasswordEder)
         btnIngresar = findViewById(R.id.btnIngresarEder)
         txtRegistrarse = findViewById(R.id.txtRegistrarseEder)
 
-        // Acción al presionar el botón de Ingresar
         btnIngresar.setOnClickListener {
             val correo = edtCorreo.text.toString().trim()
             val contrasena = edtPassword.text.toString().trim()
@@ -80,7 +79,7 @@ class PrimeraVistaEder : AppCompatActivity() {
                     if (status == "success") {
                         Toast.makeText(this@PrimeraVistaEder, message, Toast.LENGTH_SHORT).show()
 
-                        // Guardamos el nombre en SharedPreferences para tus paneles dinámicos
+
                         try {
                             val sharedPreferences = getSharedPreferences("SesionUsuario", Context.MODE_PRIVATE)
                             val editor = sharedPreferences.edit()
@@ -91,11 +90,11 @@ class PrimeraVistaEder : AppCompatActivity() {
                             e.printStackTrace()
                         }
 
-                        // Extraemos el rol que nos devuelve el archivo PHP
+
                         val rol = jsonResponse.getString("rol")
                         val idUsuario = jsonResponse.getInt("id_usuario")
 
-                        // 🔑 CORREGIDO: Compara ignorando mayúsculas/minúsculas para capturar 'enfermera' de AwardSpace
+
                         if (rol.equals("enfermera", ignoreCase = true) || rol.equals("Enfermeria", ignoreCase = true) || rol.equals("Administrador", ignoreCase = true)) {
                             val intent = Intent(this@PrimeraVistaEder, EnfermeriaActivity::class.java)
                             startActivity(intent)
@@ -127,7 +126,7 @@ class PrimeraVistaEder : AppCompatActivity() {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                // 🚀 TRUCO CLAVE: Cabecera obligatoria para saltar la validación anti-bots de AwardSpace
+
                 headers.putAll(Config.headers())
                 return headers
             }

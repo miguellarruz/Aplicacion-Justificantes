@@ -21,10 +21,10 @@ class Notification : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.notis)
 
-        // Recuperamos el ID del alumno logueado
+
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
-        // Enlazamos componentes del XML
+
         contenedorNotificaciones = findViewById(R.id.contenedorLista)
         txtNotisVacias = findViewById(R.id.txtListaVacia)
 
@@ -34,12 +34,11 @@ class Notification : AppCompatActivity() {
     private fun cargarNotificaciones() {
         contenedorNotificaciones.removeAllViews()
 
-        // 🔑 CORREGIDO: Config.IP_SERVIDOR ya incluye "justificantes_api/" de forma nativa
+
         val url = Config.endpoint("listar_notificaciones.php?id_usuario=$idUsuarioLogueado")
 
         val queue = Volley.newRequestQueue(this)
 
-        // 🛠️ CORREGIDO: Convertido a 'object : StringRequest' para inyectar cabeceras a AwardSpace
         val stringRequest = object : StringRequest(Request.Method.GET, url,
             { response ->
                 try {
@@ -54,7 +53,7 @@ class Notification : AppCompatActivity() {
                             val estatus = objeto.getString("estatus")
                             val motivo = objeto.getString("motivo")
 
-                            // Inflamos una tarjeta para la notificación
+
                             agregarNotificacionALaLista(estatus, motivo)
                         }
                     } else {
@@ -73,7 +72,7 @@ class Notification : AppCompatActivity() {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                // 🚀 TRUCO CLAVE: Cabecera obligatoria para saltar el firewall anti-bots de AwardSpace
+
                 headers.putAll(Config.headers())
                 return headers
             }

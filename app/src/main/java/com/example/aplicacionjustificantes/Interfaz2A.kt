@@ -23,10 +23,10 @@ class Interfaz2A : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // 📌 REVISA: Asegúrate de que este nombre sea exactamente el de tu archivo XML del formulario
+
         setContentView(R.layout.interfaz2)
 
-        // Ajuste perfecto del Edge-to-Edge usando la raíz ScrollView (id: main)
+
         val vistaRaiz = findViewById<View>(R.id.main)
         if (vistaRaiz != null) {
             ViewCompat.setOnApplyWindowInsetsListener(vistaRaiz) { v, insets ->
@@ -36,10 +36,10 @@ class Interfaz2A : AppCompatActivity() {
             }
         }
 
-        // Recuperamos el ID del usuario que viene desde el login
+
         idUsuarioLogueado = intent.getIntExtra("ID_USUARIO_LOGUEADO", 1)
 
-        // Vincular los componentes usando los IDs exactos de tu XML
+
         val spinnerTipo = findViewById<AutoCompleteTextView>(R.id.spinnerTipo)
         val layoutCamposMedicos = findViewById<LinearLayout>(R.id.layoutCamposMedicos)
 
@@ -50,15 +50,15 @@ class Interfaz2A : AppCompatActivity() {
         val etDetalles = findViewById<TextInputEditText>(R.id.etDetalles)
         val btnSiguiente = findViewById<MaterialButton>(R.id.btnSiguiente)
 
-        // Configuración del Menú Desplegable (Spinner Material)
+
         val opciones = arrayOf("Asunto Médico (Requiere receta)", "Asunto Personal / Familiar")
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, opciones)
         spinnerTipo.setAdapter(adapter)
 
-        // Dejar el primer elemento seleccionado por defecto
+
         spinnerTipo.setText(opciones[0], false)
 
-        // Ocultar o mostrar campos médicos según la selección
+
         spinnerTipo.setOnItemClickListener { _, _, position, _ ->
             posicionSeleccionada = position
             if (position == 0) {
@@ -68,7 +68,7 @@ class Interfaz2A : AppCompatActivity() {
             }
         }
 
-        // Acción del botón para continuar
+
         btnSiguiente.setOnClickListener {
             val tipoJustificante = spinnerTipo.text.toString()
             val motivoText = etMotivo.text.toString().trim()
@@ -78,13 +78,13 @@ class Interfaz2A : AppCompatActivity() {
             var institucionText = "N/A"
             var cedulaText = "N/A"
 
-            // Validar campos generales obligatorios
+
             if (motivoText.isEmpty() || fechaText.isEmpty() || detallesText.isEmpty()) {
                 Toast.makeText(this, "Por favor completa los campos requeridos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Validar campos médicos únicamente si se seleccionó la opción "Asunto Médico"
+
             if (posicionSeleccionada == 0) {
                 institucionText = etInstitucion.text.toString().trim()
                 cedulaText = etCedula.text.toString().trim()
@@ -95,7 +95,7 @@ class Interfaz2A : AppCompatActivity() {
                 }
             }
 
-            // Redirigir a MainActivity mandando todo el bloque de datos recolectado
+
             val intent = Intent(this, MainActivity::class.java).apply {
                 putExtra("ID_USUARIO_LOGUEADO", idUsuarioLogueado)
                 putExtra("EXTRA_TIPO", tipoJustificante)
